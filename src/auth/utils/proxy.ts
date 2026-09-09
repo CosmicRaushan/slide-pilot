@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 function redirectToSignIn(request: NextRequest, pathname: string) {
     const signInUrl = new URL(SIGN_IN_PATH, request.url);
-    // Include query string so filters/search params survive the round-trip through sign-in.
+    
     signInUrl.searchParams.set(
         "callbackUrl",
         `${pathname}${request.nextUrl.search}`,
@@ -17,8 +17,7 @@ function getPostAuthRedirectPath(request: NextRequest): string {
     return getSafeCallbackPath(callbackUrl);
 }
 
-// "/" is always public
-// "/sign-in": logged-in users redirect away; guests process
+
 export async function handleAuthProxy(request: NextRequest) {
     const { pathname } = request.nextUrl;
 

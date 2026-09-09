@@ -1,4 +1,3 @@
-import Image from "next/image";
 import type { Metadata } from "next";
 
 import {
@@ -20,7 +19,7 @@ import { GoogleSignInForm } from "@/components/auth/google-sign-in-form";
 
 export const metadata: Metadata = {
   title: "Sign in",
-  description: "Sign in to Chai AI Code Reviewer with your Google account.",
+  description: "Sign in to slidePilot with your Google account.",
 };
 
 type SignInPageProps = {
@@ -48,7 +47,7 @@ const SignInPage = async ({ searchParams }: SignInPageProps) => {
         <CardHeader className="items-center text-center">
           {" "}
           <CardTitle className="text-2xl font-semibold tracking-tight text-white">
-            Welcome on Slidepilot
+            Welcome on SlidePilot
           </CardTitle>
           <CardDescription className="mt-2 text-white/65">
             Sign in with Google to manage your presentation.
