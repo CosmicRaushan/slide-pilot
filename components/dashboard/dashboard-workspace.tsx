@@ -266,55 +266,59 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
               ) : null}
             </div>
 
-            <form
-              onSubmit={handleSubmit}
-              className="relative mt-6 shrink-0 rounded-[24px] border border-white/12 bg-white/[0.05] backdrop-blur-2xl"
-            >
-              <label htmlFor="deck-idea" className="sr-only">
-                Describe your pitch deck idea
-              </label>
-              <textarea
-                id="deck-idea"
-                rows={4}
-                value={idea}
-                onChange={(event) => setIdea(event.target.value)}
-                placeholder="A fintech for college students that rounds up spare change into index funds..."
-                className="w-full resize-none bg-transparent px-5 pt-4 pb-14 font-sans text-sm leading-6 text-zinc-100 outline-none placeholder:text-zinc-500"
-              />
+            {!isComplete ? (
+              <>
+                <form
+                  onSubmit={handleSubmit}
+                  className="relative mt-6 shrink-0 rounded-[24px] border border-white/12 bg-white/[0.05] backdrop-blur-2xl"
+                >
+                  <label htmlFor="deck-idea" className="sr-only">
+                    Describe your pitch deck idea
+                  </label>
+                  <textarea
+                    id="deck-idea"
+                    rows={4}
+                    value={idea}
+                    onChange={(event) => setIdea(event.target.value)}
+                    placeholder="A fintech for college students that rounds up spare change into index funds..."
+                    className="w-full resize-none bg-transparent px-5 pt-4 pb-14 font-sans text-sm leading-6 text-zinc-100 outline-none placeholder:text-zinc-500"
+                  />
 
-              <div className="absolute right-3 bottom-3 flex items-center gap-2">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  className="sr-only"
-                  onChange={(event) => {
-                    const nextFile = event.target.files?.[0] ?? null;
-                    setFile(nextFile);
-                    setFileName(nextFile?.name ?? null);
-                  }}
-                />
-                <button
-                  type="button"
-                  aria-label="Upload a file"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex size-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-zinc-300 transition hover:bg-white/[0.12] hover:text-white"
-                >
-                  <PaperclipIcon aria-hidden="true" className="size-4" />
-                </button>
-                <button
-                  type="submit"
-                  aria-label="Submit idea"
-                  disabled={isGenerating}
-                  className="flex size-10 items-center justify-center rounded-xl border border-[#d09a82]/40 bg-[#d09a82]/20 text-[#e2b09b] transition hover:bg-[#d09a82]/30 disabled:cursor-not-allowed disabled:opacity-40"
-                >
-                  <PaperPlaneTiltIcon aria-hidden="true" className="size-4" />
-                </button>
-              </div>
-            </form>
-            {fileName ? (
-              <p className="mt-2 truncate text-xs text-zinc-500">Attached: {fileName}</p>
+                  <div className="absolute right-3 bottom-3 flex items-center gap-2">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      className="sr-only"
+                      onChange={(event) => {
+                        const nextFile = event.target.files?.[0] ?? null;
+                        setFile(nextFile);
+                        setFileName(nextFile?.name ?? null);
+                      }}
+                    />
+                    <button
+                      type="button"
+                      aria-label="Upload a file"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="flex size-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-zinc-300 transition hover:bg-white/[0.12] hover:text-white"
+                    >
+                      <PaperclipIcon aria-hidden="true" className="size-4" />
+                    </button>
+                    <button
+                      type="submit"
+                      aria-label="Submit idea"
+                      disabled={isGenerating}
+                      className="flex size-10 items-center justify-center rounded-xl border border-[#d09a82]/40 bg-[#d09a82]/20 text-[#e2b09b] transition hover:bg-[#d09a82]/30 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <PaperPlaneTiltIcon aria-hidden="true" className="size-4" />
+                    </button>
+                  </div>
+                </form>
+                {fileName ? (
+                  <p className="mt-2 truncate text-xs text-zinc-500">Attached: {fileName}</p>
+                ) : null}
+                {error ? <p className="mt-2 text-xs text-rose-300">{error}</p> : null}
+              </>
             ) : null}
-            {error ? <p className="mt-2 text-xs text-rose-300">{error}</p> : null}
           </div>
         )}
       </section>
