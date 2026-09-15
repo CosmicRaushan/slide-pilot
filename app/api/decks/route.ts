@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     const deck = await prisma.deck.create({
         data: {
             idea: trimmed,
-            userId: session.user.id, // this is the ownership link
+            userId: session.user.id, 
             updatedAt: new Date(),
         },
     });
