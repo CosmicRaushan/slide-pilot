@@ -12,8 +12,8 @@ export async function GET(_request: Request, { params }: RouteParams) {
     const session = await getServerSession();
 
     if (!session) {
-        NextResponse.json(
-            { error: "Unatuhorized" },
+        return NextResponse.json(
+            { error: "Unauthorized" },
             {status: 401}
         )
     }

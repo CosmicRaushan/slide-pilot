@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "@/src/auth/actions";
 import prisma from "@/src/lib/db";
 import { inngest } from "@/src/lib/inngest/client";
+import { consumeCredits } from "@/src/services/credit.service";
 
 export async function POST(request: Request) {
     const session = await getServerSession();
@@ -21,8 +22,7 @@ export async function POST(request: Request) {
     const deck = await prisma.deck.create({
         data: {
             idea: trimmed,
-            userId: session.user.id, 
-            updatedAt: new Date(),
+            userId: session.user.id,
         },
     });
 
