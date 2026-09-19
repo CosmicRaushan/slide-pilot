@@ -14,16 +14,19 @@ model test {
 }
 
 model User {
-  id            String    @id
-  name          String
-  email         String
-  emailVerified Boolean   @default(false)
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  sessions      Session[]
-  accounts      Account[]
-  decks         Deck[]
+  id                 String              @id
+  name               String
+  email              String
+  emailVerified      Boolean             @default(false)
+  image              String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  sessions           Session[]
+  accounts           Account[]
+  decks              Deck[]
+  credits            Int                 @default(5)
+  creditTransactions CreditTransaction[]
+  purchases          Purchase[]
 
   @@unique([email])
   @@map("user")
@@ -85,16 +88,17 @@ enum DeckStatus {
 }
 
 model Deck {
-  id           String     @id @default(cuid())
-  userId       String
-  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  idea         String     @db.Text
-  title        String?
-  status       DeckStatus @default(PENDING)
-  errorMessage String?
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  slides       Slides[]
+  id                 String              @id @default(cuid())
+  userId             String
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  idea               String              @db.Text
+  title              String?
+  status             DeckStatus          @default(PENDING)
+  errorMessage       String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  slides             Slides[]
+  creditTransactions CreditTransaction[]
 
   @@index([userId])
 }
@@ -107,8 +111,68 @@ model Slides {
   title       String
   content     String   @db.Text
   imagePrompt String   @db.Text
-  imageUrl    String 
-  createdAt   DateTime
+  imageUrl    String
+  createdAt   DateTime @default(now())
 
   @@index([deckId])
+}
+
+// add model for payments integration with razorpay
+
+enum CreditTransactionType {
+  PURCHASE
+  DECK_GENERATION
+  REFUND
+  BONUS
+  ADMIN_ADJUSTMENT
+}
+
+enum PurchaseStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum CreditTransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+model CreditTransaction {
+  id         String                  @id @default(cuid())
+  userId     String
+  user       User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  purchaseId String?
+  purchase   Purchase?               @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  deckId     String?
+  deck       Deck?                   @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  type       CreditTransactionType
+  amount     Int
+  status     CreditTransactionStatus
+  createdAt  DateTime                @default(now())
+  updatedAt  DateTime                @updatedAt
+
+  @@index([userId])
+  @@index([purchaseId])
+  @@index([deckId])
+}
+
+model Purchase {
+  id                String              @id @default(cuid())
+  userId            String
+  user              User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  razorpayOrderId   String              @unique
+  razorpayPaymentId String?             @unique
+  credits           Int
+  transactions      CreditTransaction[]
+  amount            Int
+  status            PurchaseStatus
+  description       String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@index([userId])
 }

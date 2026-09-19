@@ -167,10 +167,10 @@ export function SlideDeckViewer({
         <article
           key={`${slide.id}-${direction}`}
           className={`
-             w-full max-w-[50vh]
-    flex flex-col overflow-hidden rounded-[28px]
-    border border-white/12 bg-white/[0.05] backdrop-blur-3xl
-    shadow-[0_16px_60px_rgba(0,0,0,0.35)]
+            w-full min-w-[430px]
+            flex flex-col overflow-hidden rounded-[16px]
+            border border-white/12 bg-white/[0.05] backdrop-blur-3xl
+            shadow-[0_16px_60px_rgba(0,0,0,0.35)]
             ${direction === "next" ? "animate-slide-in-right" : "animate-slide-in-left"}
           `}
         >
@@ -186,7 +186,7 @@ export function SlideDeckViewer({
               <img
                 src={slide.imageUrl}
                 alt={slide.title}
-                className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
+                className="h-full w-full object-cover transition duration-300 "
               />
             ) : (
               <div className="flex h-full items-center justify-center text-sm text-zinc-500">
@@ -199,7 +199,7 @@ export function SlideDeckViewer({
             </p>
 
             {slide.imageUrl ? (
-              <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/45 to-transparent px-4 py-3 text-xs text-zinc-200 opacity-0 transition group-hover:opacity-100">
+              <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/45 to-transparent px-4 py-3 text-xs text-zinc-200 opacity-0 transition ">
                 Click to view
               </span>
             ) : null}
@@ -218,7 +218,7 @@ export function SlideDeckViewer({
       </div>
 
       {/* {// need some improvement } */}
-      <div className="shrink-0 border-t border-white/10 bg-white/[0.03] px-5 py-4 sm:px-6">
+      <div className="shrink-0 border-t border-white/10 bg-white/[0.03]  px-5 py-4 sm:px-6">
         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d09a82]">
           Notes
         </p>
