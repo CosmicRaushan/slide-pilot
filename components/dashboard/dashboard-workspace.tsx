@@ -1,17 +1,21 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import { useRouter, usePathname } from "next/navigation";
+
 import { PaperclipIcon, PaperPlaneTiltIcon } from "@phosphor-icons/react";
 
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { GenerationStatus } from "@/components/dashboard/generation-status";
 import { SlideDeckViewer } from "@/components/dashboard/slide-deck-viewer";
 import type { DeckDetail, DeckListItem } from "@/src/types/deck";
-
-type NavId = "new-chat" | "ideas";
+import { NavId } from "@/src/types/navigation";
+import WalletView from "./wallet-view";
 
 type DashboardWorkspaceProps = {
   userName: string;
+  initialTab?: NavId;
 };
 
 const STATUS_MESSAGES = [
@@ -28,8 +32,7 @@ function firstName(name: string) {
 
 async function readFileAsIdea(file: File) {
   const isText =
-    file.type.startsWith("text/") ||
-    /\.(txt|md|csv|json)$/i.test(file.name);
+    file.type.startsWith("text/") || /\.(txt|md|csv|json)$/i.test(file.name);
 
   if (isText) {
     const text = (await file.text()).trim();
@@ -39,9 +42,16 @@ async function readFileAsIdea(file: File) {
   return `The user attached a file named "${file.name}" as supporting material.`;
 }
 
-export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
+export function DashboardWorkspace({
+  userName,
+  initialTab = "new-chat"
+}: DashboardWorkspaceProps) {
+
+  const router = useRouter();
+  const pathname = usePathname();
+
   const [collapsed, setCollapsed] = useState(false);
-  const [active, setActive] = useState<NavId>("new-chat");
+  const [active, setActive] = useState<NavId>(initialTab);
   const [idea, setIdea] = useState("");
   const [fileName, setFileName] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -50,20 +60,32 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
   const [statusIndex, setStatusIndex] = useState(0);
   const [activeDeck, setActiveDeck] = useState<DeckDetail | null>(null);
   const [ideas, setIdeas] = useState<DeckListItem[]>([]);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const greeting = useMemo(() => firstName(userName), [userName]);
+
   const isGenerating =
     busy ||
     activeDeck?.status === "PENDING" ||
     activeDeck?.status === "GENERATING";
-  const isComplete = activeDeck?.status === "COMPLETE" && activeDeck.slides.length > 0;
+
+  const isComplete =
+    activeDeck?.status === "COMPLETE" && activeDeck.slides.length > 0;
 
   const loadIdeas = useCallback(async () => {
-    const response = await fetch("/api/decks");
-    if (!response.ok) return;
-    const data = (await response.json()) as DeckListItem[];
-    setIdeas(data);
+    try {
+      const response = await fetch("/api/decks");
+
+      if (!response.ok) {
+        return;
+      }
+
+      const data = (await response.json()) as DeckListItem[];
+      setIdeas(data);
+    } catch {
+      // Ignore background loading errors.
+    }
   }, []);
 
   useEffect(() => {
@@ -71,25 +93,43 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
   }, [loadIdeas]);
 
   useEffect(() => {
-    if (!isGenerating) return;
+    if (!isGenerating) {
+      return;
+    }
+
     const timer = window.setInterval(() => {
       setStatusIndex((current) => (current + 1) % STATUS_MESSAGES.length);
     }, 2200);
+
     return () => window.clearInterval(timer);
   }, [isGenerating]);
 
   useEffect(() => {
-    if (!activeDeck || activeDeck.status === "COMPLETE" || activeDeck.status === "FAILED") {
+    if (
+      !activeDeck ||
+      activeDeck.status === "COMPLETE" ||
+      activeDeck.status === "FAILED"
+    ) {
       return;
     }
 
     const timer = window.setInterval(async () => {
-      const response = await fetch(`/api/decks/${activeDeck.id}`);
-      if (!response.ok) return;
-      const deck = (await response.json()) as DeckDetail;
-      setActiveDeck(deck);
-      if (deck.status === "COMPLETE" || deck.status === "FAILED") {
-        void loadIdeas();
+      try {
+        const response = await fetch(`/api/decks/${activeDeck.id}`);
+
+        if (!response.ok) {
+          return;
+        }
+
+        const deck = (await response.json()) as DeckDetail;
+
+        setActiveDeck(deck);
+
+        if (deck.status === "COMPLETE" || deck.status === "FAILED") {
+          void loadIdeas();
+        }
+      } catch {
+       
       }
     }, 2000);
 
@@ -104,21 +144,30 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
     setBusy(false);
     setStatusIndex(0);
     setActiveDeck(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   }
 
   function handleSelect(id: NavId) {
     setActive(id);
+
     if (id === "new-chat") {
       resetComposer();
+      router.push("/dashboard");
+      return;
     }
+
+    router.push(`/dashboard/${id}`)
   }
 
-  async function handleSubmit(event: React.FormEvent) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
 
     let prompt = idea.trim();
+
     if (file) {
       const fileIdea = await readFileAsIdea(file);
       prompt = prompt ? `${prompt}\n\n${fileIdea}` : fileIdea;
@@ -135,16 +184,31 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
     try {
       const response = await fetch("/api/decks", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idea: prompt }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          idea: prompt,
+        }),
       });
-      const payload = (await response.json()) as { id?: string; error?: string };
+
+      const payload = (await response.json()) as {
+        id?: string;
+        error?: string;
+      };
+
       if (!response.ok || !payload.id) {
         throw new Error(payload.error || "Could not start generation.");
       }
 
       const detailResponse = await fetch(`/api/decks/${payload.id}`);
+
+      if (!detailResponse.ok) {
+        throw new Error("Could not load the generated deck.");
+      }
+
       const deck = (await detailResponse.json()) as DeckDetail;
+
       setActiveDeck(deck);
       void loadIdeas();
     } catch (err) {
@@ -155,16 +219,32 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
   }
 
   async function openDeck(id: string) {
-    const response = await fetch(`/api/decks/${id}`);
-    if (!response.ok) return;
-    const deck = (await response.json()) as DeckDetail;
-    setActiveDeck(deck);
-    setActive("new-chat");
+    try {
+      const response = await fetch(`/api/decks/${id}`);
+
+      if (!response.ok) {
+        return;
+      }
+
+      const deck = (await response.json()) as DeckDetail;
+
+      setActiveDeck(deck);
+      setActive("new-chat");
+    } catch {
+      setError("Could not open this deck.");
+    }
   }
 
   function openPdf() {
-    if (!activeDeck) return;
-    window.open(`/dashboard/pdf/${activeDeck.id}`, "_blank", "noopener,noreferrer");
+    if (!activeDeck) {
+      return;
+    }
+
+    window.open(
+      `/dashboard/pdf/${activeDeck.id}`,
+      "_blank",
+      "noopener,noreferrer",
+    );
   }
 
   return (
@@ -189,24 +269,31 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
 
         {active === "ideas" ? (
           <div className="flex min-h-0 flex-1 flex-col">
-            <h1 className="font-heading text-2xl font-semibold text-white">Ideas</h1>
+            <h1 className="font-heading text-2xl font-semibold text-white">
+              Ideas
+            </h1>
+
             <p className="mt-1 text-sm text-zinc-400">
               Your previous pitch deck prompts live here.
             </p>
+
             <div className="mt-6 grid min-h-0 flex-1 gap-3 overflow-y-auto pr-1">
               {ideas.length === 0 ? (
-                <p className="text-sm text-zinc-500">No ideas yet. Start a new chat to create one.</p>
+                <p className="text-sm text-zinc-500">
+                  No ideas yet. Start a new chat to create one.
+                </p>
               ) : (
                 ideas.map((item) => (
                   <button
                     key={item.id}
                     type="button"
                     onClick={() => void openDeck(item.id)}
-                    className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-left transition hover:border-[#d09a82]/30 hover:bg-white/[0.07]"
+                    className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 text-left transition hover:border-[#d09a82]/30 hover:bg-white/[0.07]"
                   >
                     <p className="truncate font-sans text-sm font-semibold text-zinc-100">
                       {item.title || item.idea}
                     </p>
+
                     <p className="mt-1 text-xs capitalize text-zinc-500">
                       {item.status.toLowerCase()} · {item.slideCount} slides
                     </p>
@@ -214,6 +301,10 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
                 ))
               )}
             </div>
+          </div>
+        ) : active === "wallet" ? (
+          <div className="flex min-h-0 flex-1 flex-col">
+            <WalletView />
           </div>
         ) : (
           <div className="flex min-h-0 flex-1 flex-col">
@@ -227,11 +318,14 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
                   <p className="font-sans text-xs font-semibold uppercase tracking-[0.22em] text-[#d09a82]">
                     SlidePilot
                   </p>
+
                   <h1 className="mt-3 font-heading text-3xl font-semibold tracking-tight text-white sm:text-4xl">
                     Welcome, {greeting}
                   </h1>
+
                   <p className="mt-3 text-sm leading-6 text-zinc-400 sm:text-base">
-                    Describe your startup, product, or story and I will turn it into a pitch deck.
+                    Describe your startup, product, or story and I will turn it
+                    into a pitch deck.
                   </p>
                 </div>
               ) : null}
@@ -241,6 +335,7 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
                   <p className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-zinc-300">
                     {idea.trim() || activeDeck?.idea}
                   </p>
+
                   <GenerationStatus
                     message={
                       activeDeck?.status === "PENDING"
@@ -253,7 +348,8 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
 
               {activeDeck?.status === "FAILED" ? (
                 <p className="mt-4 text-sm text-rose-300">
-                  {activeDeck.errorMessage || "Generation failed. Try another idea."}
+                  {activeDeck.errorMessage ||
+                    "Generation failed. Try another idea."}
                 </p>
               ) : null}
 
@@ -275,6 +371,7 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
                   <label htmlFor="deck-idea" className="sr-only">
                     Describe your pitch deck idea
                   </label>
+
                   <textarea
                     id="deck-idea"
                     rows={4}
@@ -291,10 +388,12 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
                       className="sr-only"
                       onChange={(event) => {
                         const nextFile = event.target.files?.[0] ?? null;
+
                         setFile(nextFile);
                         setFileName(nextFile?.name ?? null);
                       }}
                     />
+
                     <button
                       type="button"
                       aria-label="Upload a file"
@@ -303,20 +402,30 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
                     >
                       <PaperclipIcon aria-hidden="true" className="size-4" />
                     </button>
+
                     <button
                       type="submit"
                       aria-label="Submit idea"
                       disabled={isGenerating}
                       className="flex size-10 items-center justify-center rounded-xl border border-[#d09a82]/40 bg-[#d09a82]/20 text-[#e2b09b] transition hover:bg-[#d09a82]/30 disabled:cursor-not-allowed disabled:opacity-40"
                     >
-                      <PaperPlaneTiltIcon aria-hidden="true" className="size-4" />
+                      <PaperPlaneTiltIcon
+                        aria-hidden="true"
+                        className="size-4"
+                      />
                     </button>
                   </div>
                 </form>
+
                 {fileName ? (
-                  <p className="mt-2 truncate text-xs text-zinc-500">Attached: {fileName}</p>
+                  <p className="mt-2 truncate text-xs text-zinc-500">
+                    Attached: {fileName}
+                  </p>
                 ) : null}
-                {error ? <p className="mt-2 text-xs text-rose-300">{error}</p> : null}
+
+                {error ? (
+                  <p className="mt-2 text-xs text-rose-300">{error}</p>
+                ) : null}
               </>
             ) : null}
           </div>

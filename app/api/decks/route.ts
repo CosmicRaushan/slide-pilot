@@ -19,19 +19,33 @@ export async function POST(request: Request) {
         );
     }
 
-    const deck = await prisma.deck.create({
-        data: {
-            idea: trimmed,
+    try {
+        const deck = await prisma.deck.create({
+            data: {
+                idea: trimmed,
+                userId: session.user.id,
+            },
+        });
+    
+        await consumeCredits({
             userId: session.user.id,
-        },
-    });
-
-    await inngest.send({
-        name: "deck/generate",
-        data: { deckId: deck.id },
-    });
-
-    return NextResponse.json({ id: deck.id }, { status: 201 });
+            deckId: deck.id,
+            amount: 1,
+        });
+    
+        await inngest.send({
+            name: "deck/generate",
+            data: { deckId: deck.id },
+        });
+    
+        return NextResponse.json({ id: deck.id }, { status: 201 });
+    } catch (error) {
+        console.error("Error creating deck:", error);
+        return NextResponse.json(
+            { error: "Failed to create deck" },
+            { status: 500 },
+        );
+    }
 }
 
 export async function GET() {

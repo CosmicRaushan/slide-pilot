@@ -1,0 +1,1 @@
+export type NavId = "new-chat" | "ideas" | "wallet";

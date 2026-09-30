@@ -9,6 +9,7 @@ import { DeckStatus } from "@/app/generated/prisma/enums";
 import { uploadSlideImage } from "../../imagekit";
 import { inngest } from "../client";
 import { generateSlideImages } from "../../openai";
+import { refundCredits } from "@/src/services/credit.service";
 
 
 export const generateDeck = inngest.createFunction(
@@ -106,6 +107,15 @@ export const generateDeck = inngest.createFunction(
                     },
                 });
             });
+
+            // if deck generation is failed then return credit
+            await step.run("credit-return", async () => {
+                await refundCredits({
+                    userId: deck.userId,
+                    deckId: deck.id,
+                    amount: 1,
+                })
+            })
 
             // Don't retry guardrail failures or missing decks — they won't succeed on retry
             if (

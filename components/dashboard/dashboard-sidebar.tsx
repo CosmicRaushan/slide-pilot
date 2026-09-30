@@ -4,9 +4,10 @@ import {
   CaretLeftIcon,
   ChatTeardropTextIcon,
   LightbulbIcon,
+  WalletIcon,
 } from "@phosphor-icons/react";
 
-type NavId = "new-chat" | "ideas";
+import { NavId } from "@/src/types/navigation";
 
 type DashboardSidebarProps = {
   collapsed: boolean;
@@ -20,8 +21,9 @@ const NAV_ITEMS: {
   label: string;
   icon: typeof ChatTeardropTextIcon;
 }[] = [
-  { id: "new-chat", label: "New chat", icon: ChatTeardropTextIcon },
-  { id: "ideas", label: "Ideas", icon: LightbulbIcon },
+    { id: "new-chat", label: "New chat", icon: ChatTeardropTextIcon },
+    { id: "ideas", label: "Ideas", icon: LightbulbIcon },
+    { id: "wallet", label: "Wallet", icon: WalletIcon},
 ];
 
 export function DashboardSidebar({
