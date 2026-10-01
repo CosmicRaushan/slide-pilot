@@ -2,11 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 import { PaperclipIcon, PaperPlaneTiltIcon } from "@phosphor-icons/react";
 
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
+import { useDashboardSidebarState } from "@/components/dashboard/dashboard-sidebar-state";
 import { GenerationStatus } from "@/components/dashboard/generation-status";
 import { SlideDeckViewer } from "@/components/dashboard/slide-deck-viewer";
 import type { DeckDetail, DeckListItem } from "@/src/types/deck";
@@ -15,7 +16,6 @@ import WalletView from "./wallet-view";
 
 type DashboardWorkspaceProps = {
   userName: string;
-  initialTab?: NavId;
 };
 
 const STATUS_MESSAGES = [
@@ -42,16 +42,24 @@ async function readFileAsIdea(file: File) {
   return `The user attached a file named "${file.name}" as supporting material.`;
 }
 
-export function DashboardWorkspace({
-  userName,
-  initialTab = "new-chat"
-}: DashboardWorkspaceProps) {
+async function fetchDecks() {
+  try {
+    const response = await fetch("/api/decks");
 
-  const router = useRouter();
+    if (!response.ok) {
+      return null;
+    }
+
+    return (await response.json()) as DeckListItem[];
+  } catch {
+    return null;
+  }
+}
+
+export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
   const pathname = usePathname();
 
-  const [collapsed, setCollapsed] = useState(false);
-  const [active, setActive] = useState<NavId>(initialTab);
+  const { collapsed, setCollapsed } = useDashboardSidebarState();
   const [idea, setIdea] = useState("");
   const [fileName, setFileName] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -64,33 +72,87 @@ export function DashboardWorkspace({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const greeting = useMemo(() => firstName(userName), [userName]);
+  const [, , routeTab, routeDeckId] = pathname.split("/");
+  const active: NavId =
+    routeTab === "ideas" || routeTab === "wallet"
+      ? routeTab
+      : routeTab === "deck"
+        ? "ideas"
+        : "new-chat";
+  const visibleDeck =
+    routeTab === "deck" && activeDeck?.id === routeDeckId ? activeDeck : null;
 
   const isGenerating =
     busy ||
-    activeDeck?.status === "PENDING" ||
-    activeDeck?.status === "GENERATING";
+    visibleDeck?.status === "PENDING" ||
+    visibleDeck?.status === "GENERATING";
 
   const isComplete =
-    activeDeck?.status === "COMPLETE" && activeDeck.slides.length > 0;
+    visibleDeck?.status === "COMPLETE" && visibleDeck.slides.length > 0;
 
   const loadIdeas = useCallback(async () => {
-    try {
-      const response = await fetch("/api/decks");
-
-      if (!response.ok) {
-        return;
-      }
-
-      const data = (await response.json()) as DeckListItem[];
+    const data = await fetchDecks();
+    if (data) {
       setIdeas(data);
-    } catch {
-      // Ignore background loading errors.
     }
   }, []);
 
   useEffect(() => {
-    void loadIdeas();
-  }, [loadIdeas]);
+    if (active !== "ideas") {
+      return;
+    }
+
+    let cancelled = false;
+
+    async function refreshIdeas() {
+      const data = await fetchDecks();
+      if (!cancelled && data) {
+        setIdeas(data);
+      }
+    }
+
+    void refreshIdeas();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [active]);
+
+  useEffect(() => {
+    if (!routeDeckId || activeDeck?.id === routeDeckId) {
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadDeck() {
+      try {
+        const response = await fetch(`/api/decks/${routeDeckId}`);
+
+        if (!response.ok) {
+          throw new Error("Could not load this deck.");
+        }
+
+        const deck = (await response.json()) as DeckDetail;
+
+        if (!cancelled) {
+          setActiveDeck(deck);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(
+            err instanceof Error ? err.message : "Could not load this deck.",
+          );
+        }
+      }
+    }
+
+    void loadDeck();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [routeDeckId, activeDeck?.id]);
 
   useEffect(() => {
     if (!isGenerating) {
@@ -128,9 +190,7 @@ export function DashboardWorkspace({
         if (deck.status === "COMPLETE" || deck.status === "FAILED") {
           void loadIdeas();
         }
-      } catch {
-       
-      }
+      } catch {}
     }, 2000);
 
     return () => window.clearInterval(timer);
@@ -151,15 +211,13 @@ export function DashboardWorkspace({
   }
 
   function handleSelect(id: NavId) {
-    setActive(id);
-
     if (id === "new-chat") {
       resetComposer();
-      router.push("/dashboard");
+      window.history.pushState(null, "", "/dashboard");
       return;
     }
 
-    router.push(`/dashboard/${id}`)
+    window.history.pushState(null, "", `/dashboard/${id}`);
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -179,7 +237,6 @@ export function DashboardWorkspace({
     }
 
     setBusy(true);
-    setActive("new-chat");
 
     try {
       const response = await fetch("/api/decks", {
@@ -211,6 +268,7 @@ export function DashboardWorkspace({
 
       setActiveDeck(deck);
       void loadIdeas();
+      window.history.pushState(null, "", `/dashboard/deck/${deck.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -223,25 +281,25 @@ export function DashboardWorkspace({
       const response = await fetch(`/api/decks/${id}`);
 
       if (!response.ok) {
-        return;
+        throw new Error("Could not load this deck.");
       }
 
       const deck = (await response.json()) as DeckDetail;
-
       setActiveDeck(deck);
-      setActive("new-chat");
+      setError(null);
+      window.history.pushState(null, "", `/dashboard/deck/${id}`);
     } catch {
       setError("Could not open this deck.");
     }
   }
 
   function openPdf() {
-    if (!activeDeck) {
+    if (!visibleDeck) {
       return;
     }
 
     window.open(
-      `/dashboard/pdf/${activeDeck.id}`,
+      `/dashboard/pdf/${visibleDeck.id}`,
       "_blank",
       "noopener,noreferrer",
     );
@@ -267,7 +325,7 @@ export function DashboardWorkspace({
       >
         <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-[#d09a82]/45 to-transparent" />
 
-        {active === "ideas" ? (
+        {routeTab === "ideas" ? (
           <div className="flex min-h-0 flex-1 flex-col">
             <h1 className="font-heading text-2xl font-semibold text-white">
               Ideas
@@ -302,7 +360,7 @@ export function DashboardWorkspace({
               )}
             </div>
           </div>
-        ) : active === "wallet" ? (
+        ) : routeTab === "wallet" ? (
           <div className="flex min-h-0 flex-1 flex-col">
             <WalletView />
           </div>
@@ -333,12 +391,12 @@ export function DashboardWorkspace({
               {isGenerating ? (
                 <div className="flex max-w-xl flex-col items-center gap-4 text-center">
                   <p className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-sm text-zinc-300">
-                    {idea.trim() || activeDeck?.idea}
+                    {idea.trim() || visibleDeck?.idea}
                   </p>
 
                   <GenerationStatus
                     message={
-                      activeDeck?.status === "PENDING"
+                      visibleDeck?.status === "PENDING"
                         ? "Queued — getting ready"
                         : STATUS_MESSAGES[statusIndex]
                     }
@@ -346,17 +404,17 @@ export function DashboardWorkspace({
                 </div>
               ) : null}
 
-              {activeDeck?.status === "FAILED" ? (
+              {visibleDeck?.status === "FAILED" ? (
                 <p className="mt-4 text-sm text-rose-300">
-                  {activeDeck.errorMessage ||
+                  {visibleDeck.errorMessage ||
                     "Generation failed. Try another idea."}
                 </p>
               ) : null}
 
               {isComplete ? (
                 <SlideDeckViewer
-                  title={activeDeck.title || "Untitled deck"}
-                  slides={activeDeck.slides}
+                  title={visibleDeck.title || "Untitled deck"}
+                  slides={visibleDeck.slides}
                   onOpenPdf={openPdf}
                 />
               ) : null}

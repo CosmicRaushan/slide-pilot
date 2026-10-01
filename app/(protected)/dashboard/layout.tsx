@@ -1,11 +1,11 @@
-import { requireAuth } from "@/src/auth/actions";
+import { DashboardSidebarStateProvider } from "@/components/dashboard/dashboard-sidebar-state";
 
-
-export default async function DashboardLayout(
-    {children}: {children: React.ReactNode}
-) {
-    await requireAuth();
-    return <>
-        {children}
-    </>
+export default async function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <DashboardSidebarStateProvider>{children}</DashboardSidebarStateProvider>
+  );
 }
