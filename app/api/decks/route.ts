@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "@/src/auth/actions";
 import prisma from "@/src/lib/db";
 import { inngest } from "@/src/lib/inngest/client";
-import { consumeCredits } from "@/src/services/credit.service";
+import { DeckStatus } from "@/app/generated/prisma/enums";
+import { consumeCredits, refundCredits } from "@/src/services/credit.service";
 
 export async function POST(request: Request) {
     const session = await getServerSession();
@@ -10,7 +11,17 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { idea } = await request.json();
+    let body: unknown;
+    try {
+        body = await request.json();
+    } catch {
+        return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    }
+
+    const idea =
+        typeof body === "object" && body !== null && "idea" in body
+            ? body.idea
+            : undefined;
     const trimmed = typeof idea === "string" ? idea.trim() : "";
     if (trimmed.length < 20) {
         return NextResponse.json(
@@ -19,6 +30,9 @@ export async function POST(request: Request) {
         );
     }
 
+    let deckId: string | undefined;
+    let creditsConsumed = false;
+
     try {
         const deck = await prisma.deck.create({
             data: {
@@ -26,12 +40,14 @@ export async function POST(request: Request) {
                 userId: session.user.id,
             },
         });
+        deckId = deck.id;
     
         await consumeCredits({
             userId: session.user.id,
             deckId: deck.id,
             amount: 1,
         });
+        creditsConsumed = true;
     
         await inngest.send({
             name: "deck/generate",
@@ -41,6 +57,36 @@ export async function POST(request: Request) {
         return NextResponse.json({ id: deck.id }, { status: 201 });
     } catch (error) {
         console.error("Error creating deck:", error);
+
+        if (deckId) {
+            const errorMessage = error instanceof Error ? error.message : "Failed to queue deck generation";
+
+            try {
+                await prisma.deck.update({
+                    where: { id: deckId },
+                    data: {
+                        status: DeckStatus.FAILED,
+                        errorMessage,
+                    },
+                });
+
+            } catch (cleanupError) {
+                console.error("Error marking deck creation failed:", cleanupError);
+            }
+
+            if (creditsConsumed) {
+                try {
+                    await refundCredits({
+                        userId: session.user.id,
+                        deckId,
+                        amount: 1,
+                    });
+                } catch (cleanupError) {
+                    console.error("Error refunding failed deck creation:", cleanupError);
+                }
+            }
+        }
+
         return NextResponse.json(
             { error: "Failed to create deck" },
             { status: 500 },
