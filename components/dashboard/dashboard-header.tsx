@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   ArrowRightIcon,
   BellIcon,
+  ChatCircleTextIcon,
   ChatTeardropTextIcon,
   GearIcon,
   ListIcon,
@@ -119,23 +120,42 @@ export function DashboardHeader({
     h-full
     w-full
     max-w-[1440px]
-    grid-cols-[1fr_auto] md:grid-cols-[1fr_auto_1fr]
+    grid-cols-[1fr_auto_1fr]
     items-center
     px-5
     sm:px-8
   "
         >
         <div className="flex items-center">
+          <button
+            type="button"
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-dashboard-menu"
+            onClick={() => setMobileMenuOpen((open) => !open)}
+            className="flex size-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-zinc-200 transition hover:bg-white/[0.1] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d09a82] md:hidden"
+          >
+            {mobileMenuOpen ? (
+              <XIcon aria-hidden="true" className="size-5" />
+            ) : (
+              <ListIcon aria-hidden="true" className="size-5" />
+            )}
+          </button>
             <Button
                 onClick={() => router.push("/dashboard")}
-                className="shrink-0 bg-transparent font-sans text-lg font-semibold tracking-[-0.04em] text-[#c98970] hover:bg-transparent sm:text-xl">
+                className="hidden shrink-0 bg-transparent font-sans text-xl font-semibold tracking-[-0.04em] text-[#c98970] hover:bg-transparent md:inline-flex">
             SlidePilot
           </Button>
         </div>
 
-        <div className="hidden md:col-start-2 md:block">
-          <InputGroup
-            className="
+        <div className="justify-self-center">
+          <span className="font-sans text-lg font-semibold tracking-[-0.04em] text-[#c98970] md:hidden">
+            SlidePilot
+          </span>
+
+          <div className="hidden md:block">
+            <InputGroup
+              className="
               h-9
               w-[420px]
               lg:w-[520px]
@@ -148,28 +168,30 @@ export function DashboardHeader({
               has-[[data-slot=input-group-control]:focus-visible]:bg-white/[0.08]
               has-[[data-slot=input-group-control]:focus-visible]:ring-0
             "
-          >
-            <InputGroupAddon>
-              <MagnifyingGlassIcon
-                aria-hidden="true"
-                className="size-4 text-zinc-600"
+            >
+              <InputGroupAddon>
+                <MagnifyingGlassIcon
+                  aria-hidden="true"
+                  className="size-4 text-zinc-600"
+                />
+              </InputGroupAddon>
+              <InputGroupInput
+                placeholder="Search pitchDeck....."
+                aria-label="Search pitchDeck"
+                value={searchValue}
+                onChange={
+                  onSearchChange
+                    ? (event) => onSearchChange(event.target.value)
+                    : undefined
+                }
+                className="h-9 text-zinc-200 placeholder:text-zinc-500"
               />
-            </InputGroupAddon>
-            <InputGroupInput
-              placeholder="Search pitchDeck....."
-              aria-label="Search pitchDeck"
-              value={searchValue}
-              onChange={
-                onSearchChange
-                  ? (event) => onSearchChange(event.target.value)
-                  : undefined
-              }
-              className="h-9 text-zinc-200 placeholder:text-zinc-500"
-            />
-          </InputGroup>
+            </InputGroup>
+          </div>
         </div>
 
-        <div className="hidden items-center justify-end gap-3 md:flex">
+        <div className="flex items-center justify-self-end">
+          <div className="hidden items-center justify-end gap-3 md:flex">
           <Button
             type="button"
             variant="ghost"
@@ -258,18 +280,17 @@ export function DashboardHeader({
         </div>
           <button
             type="button"
-            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
-            aria-expanded={mobileMenuOpen}
-            aria-controls="mobile-dashboard-menu"
-            onClick={() => setMobileMenuOpen((open) => !open)}
-            className="flex size-9 items-center justify-center justify-self-end rounded-full border border-white/10 bg-white/[0.05] text-zinc-200 transition hover:bg-white/[0.1] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d09a82] md:hidden"
+            aria-label="Start a new chat"
+            onClick={() => navigateMobile("/dashboard")}
+            className="flex size-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-zinc-200 transition hover:bg-white/[0.1] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d09a82] md:hidden"
           >
-            {mobileMenuOpen ? (
-              <XIcon aria-hidden="true" className="size-5" />
-            ) : (
-              <ListIcon aria-hidden="true" className="size-5" />
-            )}
+            <ChatCircleTextIcon
+              aria-hidden="true"
+              weight="regular"
+              className="size-5"
+            />
           </button>
+        </div>
         </div>
       </header>
 
@@ -284,7 +305,7 @@ export function DashboardHeader({
           <nav
             id="mobile-dashboard-menu"
             aria-label="Dashboard navigation"
-            className="fixed top-[4.5rem] right-4 left-4 z-50 mx-auto flex max-h-[calc(100dvh-5.25rem)] max-w-md flex-col overflow-hidden rounded-2xl border border-white/12 bg-[#171315]/95 p-4 text-zinc-100 shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-2xl"
+            className="fixed top-[4.5rem] bottom-4 left-4 z-50 flex w-[70vw] flex-col overflow-hidden rounded-2xl border border-white/12 bg-[#171315]/95 p-3 text-zinc-100 shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-2xl"
           >
             <div className="flex min-w-0 items-center gap-3 border-b border-white/10 pb-4">
               <Avatar className="size-11 shrink-0 after:hidden">
