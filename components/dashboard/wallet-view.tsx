@@ -124,31 +124,31 @@ export default function WalletView() {
               <tr className="sticky top-0 z-10 border-b  bg-[#181414]">
                 <th
                   scope="col"
-                  className="w-[24%] whitespace-nowrap px-1 py-2 text-left text-[9px] font-semibold uppercase tracking-normal text-zinc-500 sm:px-3 sm:text-[11px] sm:tracking-[0.14em]"
+                  className="w-[34%] whitespace-nowrap px-1 py-2 text-left text-[9px] font-semibold uppercase tracking-normal text-zinc-500 sm:w-[24%] sm:px-3 sm:text-[11px] sm:tracking-[0.14em]"
                 >
                   Deck
                 </th>
                 <th
                   scope="col"
-                  className="w-[20%] whitespace-nowrap px-1 py-2 text-left text-[9px] font-semibold uppercase tracking-normal text-zinc-500 sm:px-3 sm:text-[11px] sm:tracking-[0.14em]"
+                  className="w-[18%] whitespace-nowrap px-1 py-2 text-left text-[9px] font-semibold uppercase tracking-normal text-zinc-500 sm:w-[20%] sm:px-3 sm:text-[11px] sm:tracking-[0.14em]"
                 >
                   Date
                 </th>
                 <th
                   scope="col"
-                  className="w-[20%] whitespace-nowrap px-1 py-2 text-left text-[9px] font-semibold uppercase tracking-normal text-zinc-500 sm:px-3 sm:text-[11px] sm:tracking-[0.14em]"
+                  className="w-[17%] whitespace-nowrap px-1 py-2 text-left text-[9px] font-semibold uppercase tracking-normal text-zinc-500 sm:w-[20%] sm:px-3 sm:text-[11px] sm:tracking-[0.14em]"
                 >
                   Type
                 </th>
                 <th
                   scope="col"
-                  className="w-[14%] whitespace-nowrap px-1 py-2 text-left text-[9px] font-semibold uppercase tracking-normal text-zinc-500 sm:px-3 sm:text-[11px] sm:tracking-[0.14em]"
+                  className="w-[12%] whitespace-nowrap px-1 py-2 text-left text-[9px] font-semibold uppercase tracking-normal text-zinc-500 sm:w-[14%] sm:px-3 sm:text-[11px] sm:tracking-[0.14em]"
                 >
                   Amount
                 </th>
                 <th
                   scope="col"
-                  className="w-[22%] whitespace-nowrap px-1 py-2 text-left text-[9px] font-semibold uppercase tracking-normal text-zinc-500 sm:px-3 sm:text-[11px] sm:tracking-[0.14em]"
+                  className="w-[19%] whitespace-nowrap px-1 py-2 text-left text-[9px] font-semibold uppercase tracking-normal text-zinc-500 sm:w-[22%] sm:px-3 sm:text-[11px] sm:tracking-[0.14em]"
                 >
                   Status
                 </th>
@@ -174,7 +174,7 @@ export default function WalletView() {
                     className="truncate whitespace-nowrap px-1 py-3 text-[9px] text-zinc-300 sm:px-3 sm:py-4 sm:text-sm"
                   >
                     <span className="sm:hidden">
-                      {transaction.date.replace(/,?\s+\d{4}$/, "")}
+                      {transaction.date}
                     </span>
                     <span className="hidden sm:inline">{transaction.date}</span>
                   </td>
