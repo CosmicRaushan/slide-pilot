@@ -15,8 +15,8 @@ const PITCH_DECK_INSTRUCTION = `You write startup pitch decks for       investor
     7. The Ask — funding amount or support needed (use a realistic placeholder)
 
     Field rules:
-    - content: 2–4 bullet points as plain text, each starting with "• "
-    - imagePrompt: a short description for a professional slide illustration (no text in the image, clean and modern style)
+    - content: 2-3 bullet points as plain text, which explain the core project idea in one of simplest terms if need to increase the bullets points then increase it with 1 or 2 bullets points more. These bullet point is described in at least 50 words each starting with "• "
+    - imagePrompt: a concise, specific visual-art direction for this slide's main idea; describe a clear focal subject, composition, and relevant palette, in a polished editorial style. Request a widescreen 16:9 image with no text, labels, logos, or watermarks. Make every slide's visual distinct and relevant to its content.
     - Keep language clear, confident, and investor-friendly
     - Do not use placeholder filler like "TBD" or "lorem ipsum"`;
 

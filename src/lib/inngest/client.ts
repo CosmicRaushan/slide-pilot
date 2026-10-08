@@ -7,6 +7,11 @@ export type InngestEvent = {
             deckId: string
         };
     };
+    "deck/cancel": {
+        data: {
+            deckId: string
+        };
+    };
 };
 
 export const inngest = new Inngest({

@@ -4,7 +4,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { usePathname } from "next/navigation";
 
-import { PaperclipIcon, PaperPlaneTiltIcon } from "@phosphor-icons/react";
+import {
+  PaperclipIcon,
+  PaperPlaneTiltIcon,
+  StopIcon,
+} from "@phosphor-icons/react";
 
 import { DashboardSidebar } from "@/components/dashboard/dashboard-sidebar";
 import { useDashboardSidebarState } from "@/components/dashboard/dashboard-sidebar-state";
@@ -65,22 +69,51 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
   const [file, setFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [stopping, setStopping] = useState(false);
+  const [generationDeckId, setGenerationDeckId] = useState<string | null>(null);
   const [statusIndex, setStatusIndex] = useState(0);
   const [activeDeck, setActiveDeck] = useState<DeckDetail | null>(null);
   const [ideas, setIdeas] = useState<DeckListItem[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const ideaInputRef = useRef<HTMLTextAreaElement>(null);
+  const previousDeckStatus = useRef<{
+    id: string;
+    status: DeckDetail["status"];
+  } | null>(null);
 
   const greeting = useMemo(() => firstName(userName), [userName]);
   const [, , routeTab, routeDeckId] = pathname.split("/");
   const active: NavId =
-    routeTab === "ideas" || routeTab === "wallet"
+    routeTab === "ideas" || routeTab === "wallet" || routeTab === "wallet"
       ? routeTab
       : routeTab === "deck"
         ? "ideas"
         : "new-chat";
   const visibleDeck =
     routeTab === "deck" && activeDeck?.id === routeDeckId ? activeDeck : null;
+  const currentDeckId = activeDeck?.id;
+  const currentDeckStatus = activeDeck?.status;
+
+  useEffect(() => {
+    if (!currentDeckId || !currentDeckStatus) {
+      return;
+    }
+
+    const previous = previousDeckStatus.current;
+    if (
+      previous?.id === currentDeckId &&
+      previous.status !== "COMPLETE" &&
+      currentDeckStatus === "COMPLETE"
+    ) {
+      setCollapsed(true);
+    }
+
+    previousDeckStatus.current = {
+      id: currentDeckId,
+      status: currentDeckStatus,
+    };
+  }, [currentDeckId, currentDeckStatus, setCollapsed]);
 
   const isGenerating =
     busy ||
@@ -202,6 +235,8 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
     setFileName(null);
     setError(null);
     setBusy(false);
+    setStopping(false);
+    setGenerationDeckId(null);
     setStatusIndex(0);
     setActiveDeck(null);
 
@@ -222,6 +257,9 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (busy || isGenerating) {
+      return;
+    }
     setError(null);
 
     let prompt = idea.trim();
@@ -258,6 +296,8 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
         throw new Error(payload.error || "Could not start generation.");
       }
 
+      setGenerationDeckId(payload.id);
+
       const detailResponse = await fetch(`/api/decks/${payload.id}`);
 
       if (!detailResponse.ok) {
@@ -273,6 +313,47 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function handleStopGeneration() {
+    const deckId = activeDeck?.id ?? generationDeckId;
+    if (!deckId || stopping) {
+      return;
+    }
+
+    setStopping(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/decks/${deckId}/cancel`, {
+        method: "POST",
+      });
+      const payload = (await response.json()) as {
+        status?: DeckDetail["status"];
+        errorMessage?: string;
+        error?: string;
+      };
+
+      if (!response.ok || payload.status !== "FAILED") {
+        throw new Error(payload.error || "Could not stop deck generation.");
+      }
+
+      setActiveDeck((current) =>
+        current?.id === deckId
+          ? {
+              ...current,
+              status: "FAILED",
+              errorMessage: payload.errorMessage ?? "Generation stopped.",
+            }
+          : current,
+      );
+      setBusy(false);
+      void loadIdeas();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not stop generation.");
+    } finally {
+      setStopping(false);
     }
   }
 
@@ -306,7 +387,17 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
   }
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-6.25rem)] w-full max-w-[1400px] gap-4 px-4 pb-4">
+    <div
+      className={`mx-auto flex ${
+        routeTab === "wallet"
+          ? "h-[calc(100vh-6rem)] pb-0"
+          : routeTab === "ideas"
+          ? "h-[calc(100vh-6.25rem)]"
+          : "min-h-[calc(100vh-6.25rem)]"
+      } w-full max-w-[1400px] gap-4 px-4 ${
+        routeTab === "wallet" ? "" : "pb-4"
+      }`}
+    >
       <DashboardSidebar
         collapsed={collapsed}
         active={active}
@@ -315,13 +406,11 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
       />
 
       <section
-        className="
-          relative flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl
-          border border-white/10 bg-white/[0.03] p-5 backdrop-blur-3xl
-          shadow-[0_8px_40px_rgba(0,0,0,0.28)]
-          transition-[flex-basis,width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
-          sm:p-7
-        "
+        className={`relative flex min-w-0 flex-1 flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-3xl shadow-[0_8px_40px_rgba(0,0,0,0.28)] transition-[flex-basis,width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] sm:p-7 ${
+          routeTab === "ideas" || routeTab === "wallet"
+            ? "h-full min-h-0 overflow-hidden"
+            : "min-h-[calc(100vh-7.25rem)]"
+        } ${routeTab === "wallet" ? "pb-2 sm:pb-2" : ""}`}
       >
         <div className="pointer-events-none absolute inset-x-10 top-0 h-px bg-gradient-to-r from-transparent via-[#d09a82]/45 to-transparent" />
 
@@ -332,10 +421,10 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
             </h1>
 
             <p className="mt-1 text-sm text-zinc-400">
-              Your previous pitch deck prompts live here.
+              Your previous pitch deck prompts.
             </p>
 
-            <div className="mt-6 grid min-h-0 flex-1 gap-3 overflow-y-auto pr-1">
+            <div className="mt-6 flex-1 overflow-y-auto overflow-x-hidden pr-1 space-y-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {ideas.length === 0 ? (
                 <p className="text-sm text-zinc-500">
                   No ideas yet. Start a new chat to create one.
@@ -346,14 +435,10 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
                     key={item.id}
                     type="button"
                     onClick={() => void openDeck(item.id)}
-                    className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 text-left transition hover:border-[#d09a82]/30 hover:bg-white/[0.07]"
+                    className="flex items-center min-h-[60px] w-full min-w-0 overflow-hidden rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-left transition hover:border-[#d09a82]/30 hover:bg-white/[0.07]"
                   >
-                    <p className="truncate font-sans text-sm font-semibold text-zinc-100">
+                    <p className="truncate w-full font-sans text-sm font-semibold text-zinc-100">
                       {item.title || item.idea}
-                    </p>
-
-                    <p className="mt-1 text-xs capitalize text-zinc-500">
-                      {item.status.toLowerCase()} · {item.slideCount} slides
                     </p>
                   </button>
                 ))
@@ -365,10 +450,16 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
             <WalletView />
           </div>
         ) : (
-          <div className="flex min-h-0 flex-1 flex-col">
+          <div
+            className={`flex flex-col ${
+              isComplete ? "w-full" : "min-h-0 flex-1"
+            }`}
+          >
             <div
-              className={`flex min-h-0 flex-1 flex-col ${
-                isComplete ? "items-stretch" : "items-center justify-center"
+              className={`flex flex-col ${
+                isComplete
+                  ? "w-full items-stretch"
+                  : "min-h-0 flex-1 items-center justify-center"
               }`}
             >
               {!isGenerating && !isComplete ? (
@@ -412,11 +503,14 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
               ) : null}
 
               {isComplete ? (
-                <SlideDeckViewer
-                  title={visibleDeck.title || "Untitled deck"}
-                  slides={visibleDeck.slides}
-                  onOpenPdf={openPdf}
-                />
+                <div className="mx-auto w-full max-w-4xl space-y-6 pb-8">
+                  <SlideDeckViewer
+                    title={visibleDeck.title || "Untitled deck"}
+                    generatedAt={visibleDeck.createdAt}
+                    slides={visibleDeck.slides}
+                    onOpenPdf={openPdf}
+                  />
+                </div>
               ) : null}
             </div>
 
@@ -424,22 +518,29 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
               <>
                 <form
                   onSubmit={handleSubmit}
-                  className="relative mt-6 shrink-0 rounded-[24px] border border-white/12 bg-white/[0.05] backdrop-blur-2xl"
+                  className="mt-6 flex shrink-0 items-end gap-2 rounded-[24px] border border-white/12 bg-white/[0.05] p-3 backdrop-blur-2xl"
                 >
                   <label htmlFor="deck-idea" className="sr-only">
                     Describe your pitch deck idea
                   </label>
 
                   <textarea
+                    ref={ideaInputRef}
                     id="deck-idea"
-                    rows={4}
+                    rows={1}
                     value={idea}
                     onChange={(event) => setIdea(event.target.value)}
+                    onInput={(event) => {
+                      const input = event.currentTarget;
+                      input.style.height = "auto";
+                      input.style.height = `${Math.min(input.scrollHeight, 160)}px`;
+                    }}
+                    disabled={isGenerating}
                     placeholder="A fintech for college students that rounds up spare change into index funds..."
-                    className="w-full resize-none bg-transparent px-5 pt-4 pb-14 font-sans text-sm leading-6 text-zinc-100 outline-none placeholder:text-zinc-500"
+                    className="max-h-40 min-h-10 min-w-0 flex-1 resize-none overflow-y-auto bg-transparent px-3 py-2 font-sans text-sm leading-6 text-zinc-100 outline-none placeholder:text-zinc-500 disabled:opacity-60"
                   />
 
-                  <div className="absolute right-3 bottom-3 flex items-center gap-2">
+                  <div className="flex shrink-0 items-center gap-2">
                     <input
                       ref={fileInputRef}
                       type="file"
@@ -456,22 +557,48 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
                       type="button"
                       aria-label="Upload a file"
                       onClick={() => fileInputRef.current?.click()}
-                      className="flex size-10 items-center justify-center rounded-xl border border-white/10 bg-white/[0.06] text-zinc-300 transition hover:bg-white/[0.12] hover:text-white"
+                      disabled={isGenerating}
+                      className="flex size-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-zinc-300 transition hover:bg-white/[0.12] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       <PaperclipIcon aria-hidden="true" className="size-4" />
                     </button>
 
-                    <button
-                      type="submit"
-                      aria-label="Submit idea"
-                      disabled={isGenerating}
-                      className="flex size-10 items-center justify-center rounded-xl border border-[#d09a82]/40 bg-[#d09a82]/20 text-[#e2b09b] transition hover:bg-[#d09a82]/30 disabled:cursor-not-allowed disabled:opacity-40"
-                    >
-                      <PaperPlaneTiltIcon
-                        aria-hidden="true"
-                        className="size-4"
-                      />
-                    </button>
+                    {isGenerating ? (
+                      <button
+                        type="button"
+                        aria-label="Stop deck generation"
+                        title={
+                          stopping
+                            ? "Stopping generation..."
+                            : generationDeckId || activeDeck?.id
+                              ? "Stop generation"
+                              : "Starting generation..."
+                        }
+                        onClick={() => void handleStopGeneration()}
+                        disabled={
+                          stopping || (!generationDeckId && !activeDeck?.id)
+                        }
+                        className="flex size-10 items-center justify-center rounded-full border border-rose-400/30 bg-rose-500/15 text-rose-200 transition hover:bg-rose-500/25 disabled:cursor-not-allowed disabled:opacity-50"
+                      >
+                        <StopIcon
+                          aria-hidden="true"
+                          weight="fill"
+                          className="size-4"
+                        />
+                      </button>
+                    ) : (
+                      <button
+                        type="submit"
+                        aria-label="Submit idea"
+                        disabled={busy}
+                        className="flex size-10 items-center justify-center rounded-full border border-[#d09a82]/40 bg-[#d09a82]/20 text-[#e2b09b] transition hover:bg-[#d09a82]/30 disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        <PaperPlaneTiltIcon
+                          aria-hidden="true"
+                          className="size-4"
+                        />
+                      </button>
+                    )}
                   </div>
                 </form>
 

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import {
+  CaretDownIcon,
   CaretLeftIcon,
   CaretRightIcon,
   FilePdfIcon,
@@ -13,27 +14,27 @@ import type { Slide } from "@/src/types/deck";
 
 type SlideDeckViewerProps = {
   title: string;
+  generatedAt: string;
   slides: Slide[];
   onOpenPdf: () => void;
 };
 
 export function SlideDeckViewer({
   title,
+  generatedAt,
   slides,
   onOpenPdf,
 }: SlideDeckViewerProps) {
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState<"next" | "prev">("next");
   const [lightboxOpen, setLightboxOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const [collapsedContent, setCollapsedContent] = useState<Set<string>>(
+    () => new Set(),
+  );
 
   const slide = slides[index];
   const canPrev = index > 0;
   const canNext = index < slides.length - 1;
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     if (!lightboxOpen) return;
@@ -44,17 +45,14 @@ export function SlideDeckViewer({
     };
   }, [lightboxOpen]);
 
-  useEffect(() => {
-    setIndex(0);
-    setDirection("next");
-    setLightboxOpen(false);
-  }, [slides]);
-
-  function go(nextIndex: number) {
-    if (nextIndex < 0 || nextIndex >= slides.length) return;
-    setDirection(nextIndex > index ? "next" : "prev");
-    setIndex(nextIndex);
-  }
+  const go = useCallback(
+    (nextIndex: number) => {
+      if (nextIndex < 0 || nextIndex >= slides.length) return;
+      setDirection(nextIndex > index ? "next" : "prev");
+      setIndex(nextIndex);
+    },
+    [index, slides.length],
+  );
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
@@ -67,7 +65,7 @@ export function SlideDeckViewer({
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [index, slides.length]);
+  }, [go, index]);
 
   if (!slide) {
     return (
@@ -76,7 +74,7 @@ export function SlideDeckViewer({
   }
 
   const lightbox =
-    lightboxOpen && mounted
+    lightboxOpen
       ? createPortal(
           <div
             role="dialog"
@@ -152,82 +150,141 @@ export function SlideDeckViewer({
       : null;
 
   return (
-    <div className="relative flex min-h-0 w-full flex-1 flex-col">
-      <div className="relative flex min-h-0 flex-1 items-stretch gap-3">
-        <button
-          type="button"
-          aria-label="Previous slide"
-          disabled={!canPrev}
-          onClick={() => go(index - 1)}
-          className="my-auto flex size-11 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/[0.06] text-white backdrop-blur-xl transition hover:bg-white/[0.12] disabled:cursor-not-allowed disabled:opacity-30"
-        >
-          <CaretLeftIcon aria-hidden="true" className="size-5" />
-        </button>
-
-        <article
-          key={`${slide.id}-${direction}`}
-          className={`
-            w-full min-w-[430px]
-            flex flex-col overflow-hidden rounded-[16px]
-            border border-white/12 bg-white/[0.05] backdrop-blur-3xl
-            shadow-[0_16px_60px_rgba(0,0,0,0.35)]
-            ${direction === "next" ? "animate-slide-in-right" : "animate-slide-in-left"}
-          `}
-        >
-          <button
-            type="button"
-            onClick={() => {
-              if (slide.imageUrl) setLightboxOpen(true);
-            }}
-            aria-label={slide.imageUrl ? "Open image" : undefined}
-            className="group relative h-[420px] overflow-hidden bg-black/20 text-left"
+    <div className="w-full">
+      <header className="mb-6 flex flex-wrap items-end justify-between gap-4 border-b border-white/10 pb-5">
+        <div>
+          <h1 className="font-heading text-2xl font-semibold text-white sm:text-3xl">
+            {title}
+          </h1>
+          <time
+            dateTime={generatedAt}
+            className="mt-2 block text-sm text-zinc-400"
           >
-            {slide.imageUrl ? (
-              <img
-                src={slide.imageUrl}
-                alt={slide.title}
-                className="h-full w-full object-cover transition duration-300 "
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center text-sm text-zinc-500">
-                No image
-              </div>
-            )}
-
-            <p className="absolute left-4 top-4 rounded-full bg-black/40 px-2 py-1 text-xs text-zinc-200 backdrop-blur">
-              {index + 1}
-            </p>
-
-            {slide.imageUrl ? (
-              <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/45 to-transparent px-4 py-3 text-xs text-zinc-200 opacity-0 transition ">
-                Click to view
-              </span>
-            ) : null}
-          </button>
-        </article>
-
+            {new Date(generatedAt).toLocaleString(undefined, {
+              dateStyle: "medium",
+              timeStyle: "short",
+            })}
+          </time>
+        </div>
         <button
           type="button"
-          aria-label="Next slide"
-          disabled={!canNext}
-          onClick={() => go(index + 1)}
-          className="my-auto flex size-11 shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/[0.06] text-white backdrop-blur-xl transition hover:bg-white/[0.12] disabled:cursor-not-allowed disabled:opacity-30"
+          onClick={onOpenPdf}
+          className="flex items-center gap-2 rounded-xl border border-white/12 bg-white/[0.05] px-4 py-2.5 text-sm font-medium text-zinc-200 transition hover:bg-white/[0.1] hover:text-white"
         >
-          <CaretRightIcon aria-hidden="true" className="size-5" />
+          <FilePdfIcon aria-hidden="true" className="size-4" />
+          Export PDF
         </button>
-      </div>
+      </header>
 
-      {/* {// need some improvement } */}
-      <div className="shrink-0 border-t border-white/10 bg-white/[0.03]  px-5 py-4 sm:px-6">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#d09a82]">
-          Notes
-        </p>
-        <h3 className="mt-1.5 font-heading text-lg font-semibold text-white">
-          {slide.title}
-        </h3>
-        <p className="mt-2 max-h-[22vh] overflow-y-auto text-sm leading-6 text-zinc-300">
-          {slide.content}
-        </p>
+      <div className="space-y-6">
+        {slides.map((currentSlide, slideIndex) => (
+          <article key={currentSlide.id} className="space-y-4">
+            <h2 className="font-heading text-xl font-semibold text-white sm:text-2xl">
+              {currentSlide.title}
+            </h2>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (currentSlide.imageUrl) {
+                  setIndex(slideIndex);
+                  setLightboxOpen(true);
+                }
+              }}
+              aria-label={
+                currentSlide.imageUrl
+                  ? `Open image for ${currentSlide.title}`
+                  : undefined
+              }
+              className="group relative block aspect-[16/7] w-full overflow-hidden rounded-2xl bg-black/25 text-left"
+            >
+              {currentSlide.imageUrl ? (
+                <img
+                  src={currentSlide.imageUrl}
+                  alt={currentSlide.title}
+                  className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.01]"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center text-sm text-zinc-500">
+                  No image
+                </div>
+              )}
+              <span className="absolute left-4 top-4 rounded-full border border-white/20 bg-black/55 px-2.5 py-1.5 text-xs font-semibold text-white backdrop-blur-md">
+                {slideIndex + 1}
+              </span>
+              {currentSlide.imageUrl ? (
+                <span className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-5 py-4 text-xs text-white opacity-0 transition group-hover:opacity-100"></span>
+              ) : null}
+            </button>
+
+            <section className="border-b border-white/10 pb-4">
+              <div className="flex items-center">
+                <button
+                  type="button"
+                  aria-label={
+                    collapsedContent.has(currentSlide.id)
+                      ? `Expand content for ${currentSlide.title}`
+                      : `Collapse content for ${currentSlide.title}`
+                  }
+                  aria-expanded={!collapsedContent.has(currentSlide.id)}
+                  aria-controls={`slide-content-${currentSlide.id}`}
+                  onClick={() => {
+                    setCollapsedContent((current) => {
+                      const next = new Set(current);
+                      if (next.has(currentSlide.id)) {
+                        next.delete(currentSlide.id);
+                      } else {
+                        next.add(currentSlide.id);
+                      }
+                      return next;
+                    });
+                  }}
+                  className="flex size-8 items-center justify-center rounded-full text-zinc-400 transition hover:bg-white/[0.08] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d09a82]"
+                >
+                  <CaretDownIcon
+                    aria-hidden="true"
+                    className={`size-4 transition-transform ${
+                      collapsedContent.has(currentSlide.id) ? "-rotate-90" : ""
+                    }`}
+                  />
+                </button>
+                <h3 className="text-xs font-semibold uppercase tracking-[0.16em] text-zinc-400">
+                  Slide content
+                </h3>
+              </div>
+              <div
+                id={`slide-content-${currentSlide.id}`}
+                hidden={collapsedContent.has(currentSlide.id)}
+              >
+                <div className="mt-2 space-y-2 text-lg leading-7 text-zinc-400">
+                  {currentSlide.content
+                    .split(/(?=^\s*•\s*)/m)
+                    .map((paragraph) => paragraph.trim())
+                    .filter(Boolean)
+                    .map((paragraph, paragraphIndex) => {
+                      const isBullet = paragraph.startsWith("•");
+                      const text = paragraph
+                        .replace(/\s+/g, " ")
+                        .replace(/^•\s*/, "");
+
+                      return (
+                        <p
+                          key={`${currentSlide.id}-content-${paragraphIndex}`}
+                          className={
+                            isBullet
+                              ? "whitespace-normal pl-6 [text-indent:-1.5rem]"
+                              : "whitespace-pre-wrap"
+                          }
+                        >
+                          {isBullet ? `• ${text}` : text}
+                        </p>
+                      );
+                    })}
+                </div>
+              </div>
+            </section>
+          </article>
+        ))}
       </div>
       {lightbox}
     </div>

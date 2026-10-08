@@ -35,7 +35,7 @@ export function DashboardSidebar({
   return (
     <aside
       className={`
-        relative flex h-full shrink-0 flex-col overflow-hidden rounded-2xl
+        sticky top-[5.75rem] z-20 flex h-[calc(100vh-6rem)] shrink-0 self-start flex-col overflow-hidden rounded-2xl
         border border-white/10 bg-white/[0.03] backdrop-blur-3xl
         shadow-[0_8px_40px_rgba(0,0,0,0.28)]
         transition-[width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]

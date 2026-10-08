@@ -121,9 +121,11 @@ const questions = [
 function BrandMark({ footer = false }: { footer?: boolean }) {
   return (
     <span className={`lp-brand${footer ? " lp-brand-footer" : ""}`}>
-      <span className="lp-brand-symbol" aria-hidden="true">
-        <PresentationChartIcon />
-      </span>
+      {footer && (
+        <span className="lp-brand-symbol" aria-hidden="true">
+          <PresentationChartIcon />
+        </span>
+      )}
       <span>SlidePilot</span>
     </span>
   );
