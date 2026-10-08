@@ -394,7 +394,7 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
           : routeTab === "ideas"
           ? "h-[calc(100vh-6.25rem)]"
           : "min-h-[calc(100vh-6.25rem)]"
-      } w-full max-w-[1400px] gap-4 px-4 ${
+      } w-[calc(100%-2rem)] max-w-[1400px] gap-4 ${
         routeTab === "wallet" ? "" : "pb-4"
       }`}
     >
