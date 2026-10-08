@@ -103,7 +103,7 @@ export default function WalletView() {
 
       <section
         aria-labelledby="transactions-heading"
-        className="mb-2 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035] backdrop-blur-3xl"
+        className="mb-2 flex min-h-0 min-w-0 flex-[1_1_0%] flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.035] backdrop-blur-3xl"
       >
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-white/10 bg-white/[0.02] px-2 py-2 sm:px-6">
           <h2
@@ -118,7 +118,7 @@ export default function WalletView() {
           </span>
         </div>
 
-        <div className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="min-h-0 min-w-0 flex-[1_1_0%] overflow-x-hidden overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <table className="w-full table-fixed border-collapse">
             <thead>
               <tr className="sticky top-0 z-10 border-b  bg-[#181414]">

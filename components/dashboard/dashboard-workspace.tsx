@@ -390,9 +390,11 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
     <div
       className={`mx-auto flex ${
         routeTab === "wallet"
-          ? "h-[calc(100vh-5.75rem)] pb-0 md:h-[calc(100vh-6rem)]"
+          ? "h-[calc(100dvh-5.75rem)] pb-0 md:h-[calc(100dvh-6rem)]"
           : routeTab === "ideas"
-          ? "h-[calc(100vh-6.25rem)]"
+          ? "h-[calc(100dvh-6.25rem)]"
+          : !routeTab
+          ? "h-[calc(100dvh-5.25rem)] md:h-[calc(100dvh-7.25rem)]"
           : "min-h-[calc(100vh-6.25rem)]"
       } w-[calc(100%-2rem)] max-w-[1400px] gap-3 md:gap-4 ${
         routeTab === "wallet" ? "" : "pb-4"
@@ -408,7 +410,7 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
 
       <section
         className={`relative flex min-w-0 flex-1 flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-3 backdrop-blur-3xl shadow-[0_8px_40px_rgba(0,0,0,0.28)] transition-[flex-basis,width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] sm:p-5 md:p-7 ${
-          routeTab === "ideas" || routeTab === "wallet"
+          routeTab === "ideas" || routeTab === "wallet" || !routeTab
             ? "h-full min-h-0 overflow-hidden"
             : "min-h-[calc(100vh-7.25rem)]"
         } ${routeTab === "wallet" ? "pb-2 sm:pb-2" : ""}`}
@@ -515,7 +517,7 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
               <>
                 <form
                   onSubmit={handleSubmit}
-                  className="mt-6 flex shrink-0 items-end gap-2 rounded-2xl border border-white/12 bg-white/[0.05] p-2 backdrop-blur-2xl"
+                  className="mt-3 flex shrink-0 items-end gap-2 rounded-2xl border border-white/12 bg-white/[0.05] p-2 backdrop-blur-2xl sm:mt-6"
                 >
                   <label htmlFor="deck-idea" className="sr-only">
                     Describe your pitch deck idea
