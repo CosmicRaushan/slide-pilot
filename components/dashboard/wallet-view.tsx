@@ -148,7 +148,7 @@ export default function WalletView() {
                 </th>
                 <th
                   scope="col"
-                  className="w-[19%] whitespace-nowrap px-1 py-2 text-left text-[9px] font-semibold uppercase tracking-normal text-zinc-500 sm:w-[22%] sm:px-3 sm:text-[11px] sm:tracking-[0.14em]"
+                  className="w-[19%] whitespace-nowrap px-4 py-2 text-left text-[9px] font-semibold uppercase tracking-normal text-zinc-500 sm:w-[22%] sm:px-3 sm:text-[11px] sm:tracking-[0.14em]"
                 >
                   Status
                 </th>
