@@ -103,7 +103,7 @@ export function DashboardHeader({
     w-[calc(100%-2rem)]
     max-w-[1400px]
     -translate-x-1/2
-    rounded-4xl
+    rounded-2xl md:rounded-3xl
     border border-white/10
     bg-white/[0.02]
     backdrop-blur-3xl

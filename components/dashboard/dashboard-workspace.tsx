@@ -390,7 +390,7 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
     <div
       className={`mx-auto flex ${
         routeTab === "wallet"
-          ? "mt-2 h-[calc(100vh-6.5rem)] pb-0 md:mt-0 md:h-[calc(100vh-6rem)]"
+          ? "h-[calc(100vh-5.75rem)] pb-0 md:h-[calc(100vh-6rem)]"
           : routeTab === "ideas"
           ? "h-[calc(100vh-6.25rem)]"
           : "min-h-[calc(100vh-6.25rem)]"
@@ -515,7 +515,7 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
               <>
                 <form
                   onSubmit={handleSubmit}
-                  className="mt-6 flex shrink-0 items-end gap-2 rounded-[24px] border border-white/12 bg-white/[0.05] p-3 backdrop-blur-2xl"
+                  className="mt-6 flex shrink-0 items-end gap-2 rounded-2xl border border-white/12 bg-white/[0.05] p-2 backdrop-blur-2xl"
                 >
                   <label htmlFor="deck-idea" className="sr-only">
                     Describe your pitch deck idea
@@ -533,8 +533,8 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
                       input.style.height = `${Math.min(input.scrollHeight, 160)}px`;
                     }}
                     disabled={isGenerating}
-                    placeholder="A fintech for college students that rounds up spare change into index funds..."
-                    className="max-h-40 min-h-10 min-w-0 flex-1 resize-none overflow-y-auto bg-transparent px-3 py-2 font-sans text-sm leading-6 text-zinc-100 outline-none placeholder:text-zinc-500 disabled:opacity-60"
+                    placeholder="Enter your ideas..."
+                    className="max-h-32 min-h-9 min-w-0 flex-1 resize-none overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden bg-transparent px-3 py-1.5 font-sans text-sm leading-6 text-zinc-100 outline-none placeholder:text-zinc-500 disabled:opacity-60"
                   />
 
                   <div className="flex shrink-0 items-center gap-2">
@@ -555,7 +555,7 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
                       aria-label="Upload a file"
                       onClick={() => fileInputRef.current?.click()}
                       disabled={isGenerating}
-                      className="flex size-10 items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-zinc-300 transition hover:bg-white/[0.12] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                      className="flex size-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.06] text-zinc-300 transition hover:bg-white/[0.12] hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
                     >
                       <PaperclipIcon aria-hidden="true" className="size-4" />
                     </button>
@@ -575,7 +575,7 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
                         disabled={
                           stopping || (!generationDeckId && !activeDeck?.id)
                         }
-                        className="flex size-10 items-center justify-center rounded-full border border-rose-400/30 bg-rose-500/15 text-rose-200 transition hover:bg-rose-500/25 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex size-9 items-center justify-center rounded-full border border-rose-400/30 bg-rose-500/15 text-rose-200 transition hover:bg-rose-500/25 disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         <StopIcon
                           aria-hidden="true"
@@ -588,7 +588,7 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
                         type="submit"
                         aria-label="Submit idea"
                         disabled={busy}
-                        className="flex size-10 items-center justify-center rounded-full border border-[#d09a82]/40 bg-[#d09a82]/20 text-[#e2b09b] transition hover:bg-[#d09a82]/30 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="flex size-9 items-center justify-center rounded-full border border-[#d09a82]/40 bg-[#d09a82]/20 text-[#e2b09b] transition hover:bg-[#d09a82]/30 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         <PaperPlaneTiltIcon
                           aria-hidden="true"
