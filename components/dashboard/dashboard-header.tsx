@@ -1,11 +1,18 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import {
   ArrowRightIcon,
   BellIcon,
+  ChatTeardropTextIcon,
   GearIcon,
+  ListIcon,
+  LightbulbIcon,
   MagnifyingGlassIcon,
+  SignOutIcon,
+  WalletIcon,
+  XIcon,
 } from "@phosphor-icons/react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -55,9 +62,20 @@ export function DashboardHeader({
   onSearchChange,
 }: DashboardHeaderProps) {
   const router = useRouter();
-    const initials = user ? getInitials(user.name, user.email) : "U";
- 
+  const pathname = usePathname();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const initials = user ? getInitials(user.name, user.email) : "U";
+  const activeTab = pathname.split("/")[2];
 
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [mobileMenuOpen]);
 
   async function handleSignOut() {
     await authClient.signOut({
@@ -69,11 +87,17 @@ export function DashboardHeader({
     });
   }
 
+  function navigateMobile(path: string) {
+    setMobileMenuOpen(false);
+    router.push(path);
+  }
+
   return (
-    <header
-      className="
+    <>
+      <header
+        className="
     fixed
-    top-4
+    top-3 md:top-4
     left-1/2
     z-50
     w-[calc(100%-2rem)]
@@ -85,31 +109,31 @@ export function DashboardHeader({
     backdrop-blur-3xl
     backdrop-saturate-200
     shadow-[0_8px_40px_rgba(0,0,0,0.35)]
-   h-16 lg:h-[55px]
+   h-14 md:h-16 lg:h-[55px]
   "
-    >
-      <div
+      >
+        <div
         className="
     mx-auto
     grid
     h-full
     w-full
     max-w-[1440px]
-    grid-cols-[1fr_auto_1fr]
+    grid-cols-[1fr_auto] md:grid-cols-[1fr_auto_1fr]
     items-center
     px-5
     sm:px-8
   "
-      >
+        >
         <div className="flex items-center">
             <Button
                 onClick={() => router.push("/dashboard")}
-                className="shrink-0 font-sans text-xl font-semibold tracking-[-0.04em] text-[#c98970] bg-transparent hover:bg-tranparent">
+                className="shrink-0 bg-transparent font-sans text-lg font-semibold tracking-[-0.04em] text-[#c98970] hover:bg-transparent sm:text-xl">
             SlidePilot
           </Button>
         </div>
 
-        <div className="hidden sm:block">
+        <div className="hidden md:col-start-2 md:block">
           <InputGroup
             className="
               h-9
@@ -145,7 +169,7 @@ export function DashboardHeader({
           </InputGroup>
         </div>
 
-        <div className="flex items-center justify-end gap-3">
+        <div className="hidden items-center justify-end gap-3 md:flex">
           <Button
             type="button"
             variant="ghost"
@@ -232,7 +256,106 @@ export function DashboardHeader({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-      </div>
-    </header>
+          <button
+            type="button"
+            aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-dashboard-menu"
+            onClick={() => setMobileMenuOpen((open) => !open)}
+            className="flex size-9 items-center justify-center justify-self-end rounded-full border border-white/10 bg-white/[0.05] text-zinc-200 transition hover:bg-white/[0.1] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#d09a82] md:hidden"
+          >
+            {mobileMenuOpen ? (
+              <XIcon aria-hidden="true" className="size-5" />
+            ) : (
+              <ListIcon aria-hidden="true" className="size-5" />
+            )}
+          </button>
+        </div>
+      </header>
+
+      {mobileMenuOpen ? (
+        <div className="md:hidden">
+          <button
+            type="button"
+            aria-label="Close navigation menu"
+            onClick={() => setMobileMenuOpen(false)}
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
+          />
+          <nav
+            id="mobile-dashboard-menu"
+            aria-label="Dashboard navigation"
+            className="fixed top-[4.5rem] right-4 left-4 z-50 mx-auto flex max-h-[calc(100dvh-5.25rem)] max-w-md flex-col overflow-hidden rounded-2xl border border-white/12 bg-[#171315]/95 p-4 text-zinc-100 shadow-[0_24px_80px_rgba(0,0,0,0.6)] backdrop-blur-2xl"
+          >
+            <div className="flex min-w-0 items-center gap-3 border-b border-white/10 pb-4">
+              <Avatar className="size-11 shrink-0 after:hidden">
+                {user?.image ? (
+                  <AvatarImage src={user.image} alt={user.name} />
+                ) : null}
+                <AvatarFallback className="bg-[#d09a82] text-sm font-bold text-[#241817]">
+                  {initials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-white">
+                  {user?.name}
+                </p>
+                <p className="truncate text-xs text-zinc-400">{user?.email}</p>
+              </div>
+            </div>
+
+            <div className="flex-1 space-y-1 overflow-y-auto py-3">
+              {[
+                {
+                  label: "New chat",
+                  href: "/dashboard",
+                  icon: ChatTeardropTextIcon,
+                  active: !activeTab || activeTab === "deck",
+                },
+                {
+                  label: "Ideas",
+                  href: "/dashboard/ideas",
+                  icon: LightbulbIcon,
+                  active: activeTab === "ideas",
+                },
+                {
+                  label: "Wallet",
+                  href: "/dashboard/wallet",
+                  icon: WalletIcon,
+                  active: activeTab === "wallet",
+                },
+              ].map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.label}
+                    type="button"
+                    onClick={() => navigateMobile(item.href)}
+                    className={`flex min-h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-medium transition ${
+                      item.active
+                        ? "border border-[#d09a82]/30 bg-[#d09a82]/15 text-[#e2b09b]"
+                        : "text-zinc-300 hover:bg-white/[0.06] hover:text-white"
+                    }`}
+                  >
+                    <Icon aria-hidden="true" className="size-5" />
+                    {item.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="border-t border-white/10 pt-3">
+              <button
+                type="button"
+                onClick={() => void handleSignOut()}
+                className="flex min-h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-sm font-semibold text-rose-200 transition hover:bg-rose-400/10"
+              >
+                <SignOutIcon aria-hidden="true" className="size-5" />
+                Log out
+              </button>
+            </div>
+          </nav>
+        </div>
+      ) : null}
+    </>
   );
 }

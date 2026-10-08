@@ -19,7 +19,7 @@ export default async function DashboardPage() {
         }
       />
 
-      <div className="pt-[5.75rem]">
+      <div className="pt-16 md:pt-[5.75rem]">
         <DashboardWorkspace userName={session.user.name ?? "there"} />
       </div>
     </div>

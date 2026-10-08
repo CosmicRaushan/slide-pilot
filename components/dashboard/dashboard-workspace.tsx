@@ -390,15 +390,16 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
     <div
       className={`mx-auto flex ${
         routeTab === "wallet"
-          ? "h-[calc(100vh-6rem)] pb-0"
+          ? "mt-2 h-[calc(100vh-6.5rem)] pb-0 md:mt-0 md:h-[calc(100vh-6rem)]"
           : routeTab === "ideas"
           ? "h-[calc(100vh-6.25rem)]"
           : "min-h-[calc(100vh-6.25rem)]"
-      } w-[calc(100%-2rem)] max-w-[1400px] gap-4 ${
+      } w-[calc(100%-2rem)] max-w-[1400px] gap-3 md:gap-4 ${
         routeTab === "wallet" ? "" : "pb-4"
       }`}
     >
       <DashboardSidebar
+        className="hidden md:flex"
         collapsed={collapsed}
         active={active}
         onToggle={() => setCollapsed((value) => !value)}
@@ -406,7 +407,7 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
       />
 
       <section
-        className={`relative flex min-w-0 flex-1 flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-3xl shadow-[0_8px_40px_rgba(0,0,0,0.28)] transition-[flex-basis,width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] sm:p-7 ${
+        className={`relative flex min-w-0 flex-1 flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-3 backdrop-blur-3xl shadow-[0_8px_40px_rgba(0,0,0,0.28)] transition-[flex-basis,width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] sm:p-5 md:p-7 ${
           routeTab === "ideas" || routeTab === "wallet"
             ? "h-full min-h-0 overflow-hidden"
             : "min-h-[calc(100vh-7.25rem)]"
@@ -464,11 +465,7 @@ export function DashboardWorkspace({ userName }: DashboardWorkspaceProps) {
             >
               {!isGenerating && !isComplete ? (
                 <div className="max-w-2xl text-center">
-                  <p className="font-sans text-xs font-semibold uppercase tracking-[0.22em] text-[#d09a82]">
-                    SlidePilot
-                  </p>
-
-                  <h1 className="mt-3 font-heading text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+                  <h1 className="font-heading text-3xl font-semibold tracking-tight text-white sm:text-4xl">
                     Welcome, {greeting}
                   </h1>
 

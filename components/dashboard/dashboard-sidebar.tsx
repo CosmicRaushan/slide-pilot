@@ -10,6 +10,7 @@ import {
 import { NavId } from "@/src/types/navigation";
 
 type DashboardSidebarProps = {
+  className?: string;
   collapsed: boolean;
   active: NavId;
   onToggle: () => void;
@@ -27,6 +28,7 @@ const NAV_ITEMS: {
 ];
 
 export function DashboardSidebar({
+  className,
   collapsed,
   active,
   onToggle,
@@ -35,6 +37,7 @@ export function DashboardSidebar({
   return (
     <aside
       className={`
+        ${className ?? ""}
         sticky top-[5.75rem] z-20 flex h-[calc(100vh-6rem)] shrink-0 self-start flex-col overflow-hidden rounded-2xl
         border border-white/10 bg-white/[0.03] backdrop-blur-3xl
         shadow-[0_8px_40px_rgba(0,0,0,0.28)]
