@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "prisma generate && next dev",
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint"
@@ -33,6 +33,7 @@
     "openai": "^7.12.1",
     "pg": "^8.23.0",
     "prettier": "^3.9.6",
+    "razorpay": "^2.9.8",
     "react": "19.2.8",
     "react-day-picker": "^10.0.1",
     "react-dom": "19.2.8",

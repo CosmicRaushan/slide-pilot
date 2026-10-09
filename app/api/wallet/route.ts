@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "@/src/auth/actions";
+import { CREDIT_PACKAGES } from "@/src/config/credit-package";
 import prisma from "@/src/lib/db";
+import { getPurchaseHistory } from "@/src/services/purchase.service";
 
 export async function GET() {
   const session = await getServerSession();
@@ -19,46 +21,30 @@ export async function GET() {
       },
     });
 
-    const transactions = await prisma.creditTransaction.findMany({
-      where: {
-        userId: session.user.id,
-      },
-      orderBy: {
-        createdAt: "desc",
-      },
-      take: 50,
-      select: {
-        id: true,
-        deckId: true,
-        deck: {
-          select: {
-            title: true,
-            idea: true,
-          }
-        },
-        type: true,
-        amount: true,
-        status: true,
-        createdAt: true,
-      },
-    });
+    const purchases = await getPurchaseHistory(session.user.id);
+    const packages = Object.values(CREDIT_PACKAGES);
 
     return NextResponse.json({
       credits: user?.credits ?? 0,
-      transactions: transactions.map((t) => ({
-        id: t.id,
-        deckId: t.deckId,
-        deck: t.deck?.title,
-        date: new Intl.DateTimeFormat("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        }).format(new Date(t.createdAt)),
-        createdAt: t.createdAt.toISOString(),
-        type: t.type,
-        amount: t.amount,
-        status: t.status,
-      })),
+      purchases: purchases.map((purchase) => {
+        const creditPackage =
+          packages.find(
+            (candidate) => candidate.id === purchase.packageId,
+          ) ??
+          packages.find(
+            (candidate) => candidate.credits === purchase.credits,
+          );
+
+        return {
+          id: purchase.id,
+          plan: creditPackage?.name ?? `${purchase.credits} credits`,
+          credits: purchase.credits,
+          amountPaise: purchase.amount,
+          paymentMethod: purchase.paymentMethod,
+          status: purchase.status,
+          createdAt: purchase.createdAt.toISOString(),
+        };
+      }),
     });
   } catch (error) {
     console.error("Error fetching wallet data:", error);

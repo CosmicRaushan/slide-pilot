@@ -13,9 +13,17 @@ import {
   RocketLaunchIcon,
   SparkleIcon,
 } from "@phosphor-icons/react/dist/ssr";
+import { CREDIT_PACKAGES } from "@/src/config/credit-package";
 import "./landing.css";
 
 const signupHref = "/sign-in?callbackUrl=%2Fdashboard";
+const pricingHref = "/sign-in?callbackUrl=%2Fdashboard%2Fbilling";
+const publicCreditPackages = Object.values(CREDIT_PACKAGES).filter(
+  (creditPackage) => creditPackage.id !== "test",
+);
+const formatRupees = new Intl.NumberFormat("en-IN", {
+  maximumFractionDigits: 0,
+});
 
 const features = [
   {
@@ -109,7 +117,7 @@ const questions = [
   {
     question: "How much does it cost to try?",
     answer:
-      "New accounts start with five credits. One credit is used for each deck generation. Paid credit top-ups are not available in the current app yet.",
+      "New accounts start with five free credits. You can buy one-time credit packs from the Wallet. One credit is used for each deck generation.",
   },
   {
     question: "Where are my decks saved?",
@@ -522,62 +530,65 @@ export default function HomePage() {
         id="pricing"
         aria-labelledby="pricing-title"
       >
-        <div className="lp-shell lp-pricing-grid">
-          <div className="lp-section-intro">
-            <span className="lp-kicker">A LITTLE HEAD START</span>
+        <div className="lp-shell lp-pricing-content">
+          <div className="lp-section-intro lp-pricing-intro">
+            <span className="lp-kicker">SIMPLE, ONE-TIME CREDIT PACKS</span>
             <h2 id="pricing-title">
-              Your first five ideas are <em>on us.</em>
+              Pick the right pace for <em>your next idea.</em>
             </h2>
             <p>
-              New accounts include five generation credits. Each new deck uses
-              one credit. No payment details needed to begin.
+              Every new account starts with five free credits. When you need
+              more, choose a pack that fits your workflow.
             </p>
             <span className="lp-pricing-note">
-              <CloudCheckIcon aria-hidden="true" /> Decks are saved in your
-              account’s Ideas workspace.
+              <CloudCheckIcon aria-hidden="true" /> One credit is used for each
+              generated deck. No subscription.
             </span>
           </div>
-          <div className="lp-price-card">
-            <div className="lp-price-card-top">
-              <span>SLIDEPILOT STARTER</span>
-              <span className="lp-price-badge">FREE TO START</span>
-            </div>
-            <div className="lp-price">
-              <span>$</span>0 <small>to get started</small>
-            </div>
-            <p className="lp-price-subtitle">
-              Everything you need to try your first pitch draft.
-            </p>
-            <ul>
-              <li>
-                <CheckIcon weight="bold" aria-hidden="true" /> 5 generation
-                credits included
-              </li>
-              <li>
-                <CheckIcon weight="bold" aria-hidden="true" /> 5–8 slides per
-                generated deck
-              </li>
-              <li>
-                <CheckIcon weight="bold" aria-hidden="true" /> AI-generated
-                slide visuals
-              </li>
-              <li>
-                <CheckIcon weight="bold" aria-hidden="true" /> Saved decks in
-                Ideas
-              </li>
-              <li>
-                <CheckIcon weight="bold" aria-hidden="true" /> Print or save to
-                PDF
-              </li>
-            </ul>
-            <Link className="lp-button lp-price-button" href={signupHref}>
-              Use my 5 free credits <ArrowRightIcon aria-hidden="true" />
-            </Link>
-            <p className="lp-price-footnote">
-              Paid plans and credit top-ups are not available in the current
-              app.
-            </p>
+
+          <div className="lp-plan-grid">
+            {publicCreditPackages.map((creditPackage) => (
+              <article
+                className={`lp-price-card lp-plan-card${
+                  creditPackage.id === "pro" ? " lp-plan-card-featured" : ""
+                }`}
+                key={creditPackage.id}
+              >
+                <div className="lp-price-card-top">
+                  <span>{creditPackage.name.toUpperCase()}</span>
+                  {creditPackage.id === "pro" ? (
+                    <span className="lp-price-badge">POPULAR</span>
+                  ) : null}
+                </div>
+                <div className="lp-price">
+                  <span>₹</span>
+                  {formatRupees.format(creditPackage.amountPaise / 100)}
+                </div>
+                <p className="lp-price-subtitle">
+                  {creditPackage.credits} credits · one-time pack
+                </p>
+                <ul>
+                  <li>
+                    <CheckIcon weight="bold" aria-hidden="true" />{" "}
+                    {creditPackage.credits} deck generations
+                  </li>
+                  <li>
+                    <CheckIcon weight="bold" aria-hidden="true" /> Credits never
+                    auto-renew
+                  </li>
+                </ul>
+                <Link
+                  className="lp-button lp-price-button"
+                  href={pricingHref}
+                >
+                  Choose {creditPackage.name}
+                </Link>
+              </article>
+            ))}
           </div>
+          <p className="lp-price-footnote lp-pricing-footnote">
+            One-time purchase · All prices are in Indian rupees.
+          </p>
         </div>
       </section>
 

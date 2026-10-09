@@ -1247,6 +1247,8 @@ export const PurchaseScalarFieldEnum = {
   razorpayOrderId: 'razorpayOrderId',
   razorpayPaymentId: 'razorpayPaymentId',
   credits: 'credits',
+  packageId: 'packageId',
+  paymentMethod: 'paymentMethod',
   amount: 'amount',
   status: 'status',
   description: 'description',

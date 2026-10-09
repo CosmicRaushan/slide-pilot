@@ -42,6 +42,8 @@ export type PurchaseMinAggregateOutputType = {
   razorpayOrderId: string | null
   razorpayPaymentId: string | null
   credits: number | null
+  packageId: string | null
+  paymentMethod: string | null
   amount: number | null
   status: $Enums.PurchaseStatus | null
   description: string | null
@@ -55,6 +57,8 @@ export type PurchaseMaxAggregateOutputType = {
   razorpayOrderId: string | null
   razorpayPaymentId: string | null
   credits: number | null
+  packageId: string | null
+  paymentMethod: string | null
   amount: number | null
   status: $Enums.PurchaseStatus | null
   description: string | null
@@ -68,6 +72,8 @@ export type PurchaseCountAggregateOutputType = {
   razorpayOrderId: number
   razorpayPaymentId: number
   credits: number
+  packageId: number
+  paymentMethod: number
   amount: number
   status: number
   description: number
@@ -93,6 +99,8 @@ export type PurchaseMinAggregateInputType = {
   razorpayOrderId?: true
   razorpayPaymentId?: true
   credits?: true
+  packageId?: true
+  paymentMethod?: true
   amount?: true
   status?: true
   description?: true
@@ -106,6 +114,8 @@ export type PurchaseMaxAggregateInputType = {
   razorpayOrderId?: true
   razorpayPaymentId?: true
   credits?: true
+  packageId?: true
+  paymentMethod?: true
   amount?: true
   status?: true
   description?: true
@@ -119,6 +129,8 @@ export type PurchaseCountAggregateInputType = {
   razorpayOrderId?: true
   razorpayPaymentId?: true
   credits?: true
+  packageId?: true
+  paymentMethod?: true
   amount?: true
   status?: true
   description?: true
@@ -219,6 +231,8 @@ export type PurchaseGroupByOutputType = {
   razorpayOrderId: string
   razorpayPaymentId: string | null
   credits: number
+  packageId: string | null
+  paymentMethod: string | null
   amount: number
   status: $Enums.PurchaseStatus
   description: string | null
@@ -255,6 +269,8 @@ export type PurchaseWhereInput = {
   razorpayOrderId?: Prisma.StringFilter<"Purchase"> | string
   razorpayPaymentId?: Prisma.StringNullableFilter<"Purchase"> | string | null
   credits?: Prisma.IntFilter<"Purchase"> | number
+  packageId?: Prisma.StringNullableFilter<"Purchase"> | string | null
+  paymentMethod?: Prisma.StringNullableFilter<"Purchase"> | string | null
   amount?: Prisma.IntFilter<"Purchase"> | number
   status?: Prisma.EnumPurchaseStatusFilter<"Purchase"> | $Enums.PurchaseStatus
   description?: Prisma.StringNullableFilter<"Purchase"> | string | null
@@ -270,6 +286,8 @@ export type PurchaseOrderByWithRelationInput = {
   razorpayOrderId?: Prisma.SortOrder
   razorpayPaymentId?: Prisma.SortOrderInput | Prisma.SortOrder
   credits?: Prisma.SortOrder
+  packageId?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentMethod?: Prisma.SortOrderInput | Prisma.SortOrder
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -288,6 +306,8 @@ export type PurchaseWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.PurchaseWhereInput | Prisma.PurchaseWhereInput[]
   userId?: Prisma.StringFilter<"Purchase"> | string
   credits?: Prisma.IntFilter<"Purchase"> | number
+  packageId?: Prisma.StringNullableFilter<"Purchase"> | string | null
+  paymentMethod?: Prisma.StringNullableFilter<"Purchase"> | string | null
   amount?: Prisma.IntFilter<"Purchase"> | number
   status?: Prisma.EnumPurchaseStatusFilter<"Purchase"> | $Enums.PurchaseStatus
   description?: Prisma.StringNullableFilter<"Purchase"> | string | null
@@ -303,6 +323,8 @@ export type PurchaseOrderByWithAggregationInput = {
   razorpayOrderId?: Prisma.SortOrder
   razorpayPaymentId?: Prisma.SortOrderInput | Prisma.SortOrder
   credits?: Prisma.SortOrder
+  packageId?: Prisma.SortOrderInput | Prisma.SortOrder
+  paymentMethod?: Prisma.SortOrderInput | Prisma.SortOrder
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -324,6 +346,8 @@ export type PurchaseScalarWhereWithAggregatesInput = {
   razorpayOrderId?: Prisma.StringWithAggregatesFilter<"Purchase"> | string
   razorpayPaymentId?: Prisma.StringNullableWithAggregatesFilter<"Purchase"> | string | null
   credits?: Prisma.IntWithAggregatesFilter<"Purchase"> | number
+  packageId?: Prisma.StringNullableWithAggregatesFilter<"Purchase"> | string | null
+  paymentMethod?: Prisma.StringNullableWithAggregatesFilter<"Purchase"> | string | null
   amount?: Prisma.IntWithAggregatesFilter<"Purchase"> | number
   status?: Prisma.EnumPurchaseStatusWithAggregatesFilter<"Purchase"> | $Enums.PurchaseStatus
   description?: Prisma.StringNullableWithAggregatesFilter<"Purchase"> | string | null
@@ -336,6 +360,8 @@ export type PurchaseCreateInput = {
   razorpayOrderId: string
   razorpayPaymentId?: string | null
   credits: number
+  packageId?: string | null
+  paymentMethod?: string | null
   amount: number
   status: $Enums.PurchaseStatus
   description?: string | null
@@ -351,6 +377,8 @@ export type PurchaseUncheckedCreateInput = {
   razorpayOrderId: string
   razorpayPaymentId?: string | null
   credits: number
+  packageId?: string | null
+  paymentMethod?: string | null
   amount: number
   status: $Enums.PurchaseStatus
   description?: string | null
@@ -364,6 +392,8 @@ export type PurchaseUpdateInput = {
   razorpayOrderId?: Prisma.StringFieldUpdateOperationsInput | string
   razorpayPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   credits?: Prisma.IntFieldUpdateOperationsInput | number
+  packageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumPurchaseStatusFieldUpdateOperationsInput | $Enums.PurchaseStatus
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -379,6 +409,8 @@ export type PurchaseUncheckedUpdateInput = {
   razorpayOrderId?: Prisma.StringFieldUpdateOperationsInput | string
   razorpayPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   credits?: Prisma.IntFieldUpdateOperationsInput | number
+  packageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumPurchaseStatusFieldUpdateOperationsInput | $Enums.PurchaseStatus
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -393,6 +425,8 @@ export type PurchaseCreateManyInput = {
   razorpayOrderId: string
   razorpayPaymentId?: string | null
   credits: number
+  packageId?: string | null
+  paymentMethod?: string | null
   amount: number
   status: $Enums.PurchaseStatus
   description?: string | null
@@ -405,6 +439,8 @@ export type PurchaseUpdateManyMutationInput = {
   razorpayOrderId?: Prisma.StringFieldUpdateOperationsInput | string
   razorpayPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   credits?: Prisma.IntFieldUpdateOperationsInput | number
+  packageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumPurchaseStatusFieldUpdateOperationsInput | $Enums.PurchaseStatus
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -418,6 +454,8 @@ export type PurchaseUncheckedUpdateManyInput = {
   razorpayOrderId?: Prisma.StringFieldUpdateOperationsInput | string
   razorpayPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   credits?: Prisma.IntFieldUpdateOperationsInput | number
+  packageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumPurchaseStatusFieldUpdateOperationsInput | $Enums.PurchaseStatus
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -446,6 +484,8 @@ export type PurchaseCountOrderByAggregateInput = {
   razorpayOrderId?: Prisma.SortOrder
   razorpayPaymentId?: Prisma.SortOrder
   credits?: Prisma.SortOrder
+  packageId?: Prisma.SortOrder
+  paymentMethod?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   description?: Prisma.SortOrder
@@ -464,6 +504,8 @@ export type PurchaseMaxOrderByAggregateInput = {
   razorpayOrderId?: Prisma.SortOrder
   razorpayPaymentId?: Prisma.SortOrder
   credits?: Prisma.SortOrder
+  packageId?: Prisma.SortOrder
+  paymentMethod?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   description?: Prisma.SortOrder
@@ -477,6 +519,8 @@ export type PurchaseMinOrderByAggregateInput = {
   razorpayOrderId?: Prisma.SortOrder
   razorpayPaymentId?: Prisma.SortOrder
   credits?: Prisma.SortOrder
+  packageId?: Prisma.SortOrder
+  paymentMethod?: Prisma.SortOrder
   amount?: Prisma.SortOrder
   status?: Prisma.SortOrder
   description?: Prisma.SortOrder
@@ -556,6 +600,8 @@ export type PurchaseCreateWithoutUserInput = {
   razorpayOrderId: string
   razorpayPaymentId?: string | null
   credits: number
+  packageId?: string | null
+  paymentMethod?: string | null
   amount: number
   status: $Enums.PurchaseStatus
   description?: string | null
@@ -569,6 +615,8 @@ export type PurchaseUncheckedCreateWithoutUserInput = {
   razorpayOrderId: string
   razorpayPaymentId?: string | null
   credits: number
+  packageId?: string | null
+  paymentMethod?: string | null
   amount: number
   status: $Enums.PurchaseStatus
   description?: string | null
@@ -612,6 +660,8 @@ export type PurchaseScalarWhereInput = {
   razorpayOrderId?: Prisma.StringFilter<"Purchase"> | string
   razorpayPaymentId?: Prisma.StringNullableFilter<"Purchase"> | string | null
   credits?: Prisma.IntFilter<"Purchase"> | number
+  packageId?: Prisma.StringNullableFilter<"Purchase"> | string | null
+  paymentMethod?: Prisma.StringNullableFilter<"Purchase"> | string | null
   amount?: Prisma.IntFilter<"Purchase"> | number
   status?: Prisma.EnumPurchaseStatusFilter<"Purchase"> | $Enums.PurchaseStatus
   description?: Prisma.StringNullableFilter<"Purchase"> | string | null
@@ -624,6 +674,8 @@ export type PurchaseCreateWithoutTransactionsInput = {
   razorpayOrderId: string
   razorpayPaymentId?: string | null
   credits: number
+  packageId?: string | null
+  paymentMethod?: string | null
   amount: number
   status: $Enums.PurchaseStatus
   description?: string | null
@@ -638,6 +690,8 @@ export type PurchaseUncheckedCreateWithoutTransactionsInput = {
   razorpayOrderId: string
   razorpayPaymentId?: string | null
   credits: number
+  packageId?: string | null
+  paymentMethod?: string | null
   amount: number
   status: $Enums.PurchaseStatus
   description?: string | null
@@ -666,6 +720,8 @@ export type PurchaseUpdateWithoutTransactionsInput = {
   razorpayOrderId?: Prisma.StringFieldUpdateOperationsInput | string
   razorpayPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   credits?: Prisma.IntFieldUpdateOperationsInput | number
+  packageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumPurchaseStatusFieldUpdateOperationsInput | $Enums.PurchaseStatus
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -680,6 +736,8 @@ export type PurchaseUncheckedUpdateWithoutTransactionsInput = {
   razorpayOrderId?: Prisma.StringFieldUpdateOperationsInput | string
   razorpayPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   credits?: Prisma.IntFieldUpdateOperationsInput | number
+  packageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumPurchaseStatusFieldUpdateOperationsInput | $Enums.PurchaseStatus
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -692,6 +750,8 @@ export type PurchaseCreateManyUserInput = {
   razorpayOrderId: string
   razorpayPaymentId?: string | null
   credits: number
+  packageId?: string | null
+  paymentMethod?: string | null
   amount: number
   status: $Enums.PurchaseStatus
   description?: string | null
@@ -704,6 +764,8 @@ export type PurchaseUpdateWithoutUserInput = {
   razorpayOrderId?: Prisma.StringFieldUpdateOperationsInput | string
   razorpayPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   credits?: Prisma.IntFieldUpdateOperationsInput | number
+  packageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumPurchaseStatusFieldUpdateOperationsInput | $Enums.PurchaseStatus
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -717,6 +779,8 @@ export type PurchaseUncheckedUpdateWithoutUserInput = {
   razorpayOrderId?: Prisma.StringFieldUpdateOperationsInput | string
   razorpayPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   credits?: Prisma.IntFieldUpdateOperationsInput | number
+  packageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumPurchaseStatusFieldUpdateOperationsInput | $Enums.PurchaseStatus
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -730,6 +794,8 @@ export type PurchaseUncheckedUpdateManyWithoutUserInput = {
   razorpayOrderId?: Prisma.StringFieldUpdateOperationsInput | string
   razorpayPaymentId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   credits?: Prisma.IntFieldUpdateOperationsInput | number
+  packageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentMethod?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   amount?: Prisma.IntFieldUpdateOperationsInput | number
   status?: Prisma.EnumPurchaseStatusFieldUpdateOperationsInput | $Enums.PurchaseStatus
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -774,6 +840,8 @@ export type PurchaseSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   razorpayOrderId?: boolean
   razorpayPaymentId?: boolean
   credits?: boolean
+  packageId?: boolean
+  paymentMethod?: boolean
   amount?: boolean
   status?: boolean
   description?: boolean
@@ -790,6 +858,8 @@ export type PurchaseSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   razorpayOrderId?: boolean
   razorpayPaymentId?: boolean
   credits?: boolean
+  packageId?: boolean
+  paymentMethod?: boolean
   amount?: boolean
   status?: boolean
   description?: boolean
@@ -804,6 +874,8 @@ export type PurchaseSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   razorpayOrderId?: boolean
   razorpayPaymentId?: boolean
   credits?: boolean
+  packageId?: boolean
+  paymentMethod?: boolean
   amount?: boolean
   status?: boolean
   description?: boolean
@@ -818,6 +890,8 @@ export type PurchaseSelectScalar = {
   razorpayOrderId?: boolean
   razorpayPaymentId?: boolean
   credits?: boolean
+  packageId?: boolean
+  paymentMethod?: boolean
   amount?: boolean
   status?: boolean
   description?: boolean
@@ -825,7 +899,7 @@ export type PurchaseSelectScalar = {
   updatedAt?: boolean
 }
 
-export type PurchaseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "razorpayOrderId" | "razorpayPaymentId" | "credits" | "amount" | "status" | "description" | "createdAt" | "updatedAt", ExtArgs["result"]["purchase"]>
+export type PurchaseOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "razorpayOrderId" | "razorpayPaymentId" | "credits" | "packageId" | "paymentMethod" | "amount" | "status" | "description" | "createdAt" | "updatedAt", ExtArgs["result"]["purchase"]>
 export type PurchaseInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   transactions?: boolean | Prisma.Purchase$transactionsArgs<ExtArgs>
@@ -850,6 +924,8 @@ export type $PurchasePayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     razorpayOrderId: string
     razorpayPaymentId: string | null
     credits: number
+    packageId: string | null
+    paymentMethod: string | null
     amount: number
     status: $Enums.PurchaseStatus
     description: string | null
@@ -1285,6 +1361,8 @@ export interface PurchaseFieldRefs {
   readonly razorpayOrderId: Prisma.FieldRef<"Purchase", 'String'>
   readonly razorpayPaymentId: Prisma.FieldRef<"Purchase", 'String'>
   readonly credits: Prisma.FieldRef<"Purchase", 'Int'>
+  readonly packageId: Prisma.FieldRef<"Purchase", 'String'>
+  readonly paymentMethod: Prisma.FieldRef<"Purchase", 'String'>
   readonly amount: Prisma.FieldRef<"Purchase", 'Int'>
   readonly status: Prisma.FieldRef<"Purchase", 'PurchaseStatus'>
   readonly description: Prisma.FieldRef<"Purchase", 'String'>

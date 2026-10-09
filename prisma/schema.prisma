@@ -167,6 +167,8 @@ model Purchase {
   razorpayOrderId   String              @unique
   razorpayPaymentId String?             @unique
   credits           Int
+  packageId         String?
+  paymentMethod     String?
   transactions      CreditTransaction[]
   amount            Int
   status            PurchaseStatus
